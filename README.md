@@ -299,7 +299,7 @@ The `infra/terraform/` directory contains 6 independent lab configurations for A
 - Target Groups
 - Security Groups
 - Elastic IPs (5 per lab)
-- VPC with public subnets
+- VPC with public subnets.
 
 Each lab uses:
 - **Region**: us-east-1
