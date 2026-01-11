@@ -1,0 +1,61 @@
+{
+  "name": "tracking-service",
+  "projectType": "application",
+  "sourceRoot": "apps/tracking-service/src",
+  "prefix": "tracking",
+  "tags": ["app", "tracking", "scope:tracking"],
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/tracking-service",
+        "main": "apps/tracking-service/src/main.ts",
+        "tsConfig": "apps/tracking-service/tsconfig.app.json",
+        "webpackConfig": "apps/tracking-service/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "tracking-service:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "tracking-service:build:development"
+        },
+        "production": {
+          "buildTarget": "tracking-service:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/tracking-service/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/tracking-service/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    }
+  }
+}
