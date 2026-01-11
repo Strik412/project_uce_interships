@@ -1,0 +1,56 @@
+{
+  "name": "registration-service",
+  "projectType": "application",
+  "root": "apps/registration-service",
+  "sourceRoot": "apps/registration-service/src",
+  "prefix": "",
+  "tags": ["type:app", "scope:registration"],
+  "targets": {
+    "serve": {
+      "executor": "@nx/node:node",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "buildTarget": "registration-service:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "registration-service:build:development"
+        },
+        "production": {
+          "buildTarget": "registration-service:build:production"
+        }
+      }
+    },
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/registration-service",
+        "main": "apps/registration-service/src/main.ts",
+        "tsConfig": "apps/registration-service/tsconfig.app.json",
+        "webpackConfig": "apps/registration-service/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "lintFilePatterns": ["apps/registration-service/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/registration-service/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  }
+}
