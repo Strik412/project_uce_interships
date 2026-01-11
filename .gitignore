@@ -1,29 +1,49 @@
-node_modules
-dist
-.DS_Store
+# Build outputs
+.next/
+dist/
+build/
+*.tsbuildinfo
+
+# Dependencies
+node_modules/
+pnpm-debug.log*
+
+# Environment
 .env
 .env.local
 .env.*.local
-.cache
-.coverage
-coverage
-.jest-cache
-*.log
-.vscode
-.idea
+*.pem
+*.key
+
+# IDE
+.vscode/
+.idea/
 *.swp
-*.swo
-*~
-.turbo
-.next
-out
-build
-.nx/cache
-terraform/.terraform
-terraform/*.tfstate*
-terraform/*.tfvars
-!terraform/environments/*.tfvars
-docker-compose.override.yml
-.mongod
-.rabbitmq
-.redis
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+volumes/
+
+# Terraform
+infra/terraform/**/.terraform/
+infra/terraform/**/.terraform.lock.hcl
+infra/terraform/**/terraform.tfstate*
+infra/terraform/**/*.tfvars
+
+# Test/local scripts
+*.http
+*.log
+test-*.ps1
+temp_*.sql
+check_*.sql
+fix_*.sql
+insert_*.sql
+update_*.sql
+verify_*.sql
+create_test_*.sql
+postman-collection.json
+QUICKSTART.bat
+start-auth-service.js
