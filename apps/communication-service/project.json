@@ -1,0 +1,61 @@
+{
+  "name": "communication-service",
+  "projectType": "application",
+  "sourceRoot": "apps/communication-service/src",
+  "prefix": "communication",
+  "tags": ["app", "communication", "scope:communication"],
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/communication-service",
+        "main": "apps/communication-service/src/main.ts",
+        "tsConfig": "apps/communication-service/tsconfig.app.json",
+        "webpackConfig": "apps/communication-service/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "communication-service:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "communication-service:build:development"
+        },
+        "production": {
+          "buildTarget": "communication-service:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/communication-service/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/communication-service/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    }
+  }
+}
