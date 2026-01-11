@@ -1,0 +1,61 @@
+{
+  "name": "document-management-service",
+  "projectType": "application",
+  "sourceRoot": "apps/document-management-service/src",
+  "prefix": "doc",
+  "tags": ["app", "document-management", "scope:document"],
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/document-management-service",
+        "main": "apps/document-management-service/src/main.ts",
+        "tsConfig": "apps/document-management-service/tsconfig.app.json",
+        "webpackConfig": "apps/document-management-service/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "document-management-service:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "document-management-service:build:development"
+        },
+        "production": {
+          "buildTarget": "document-management-service:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/document-management-service/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/document-management-service/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    }
+  }
+}
