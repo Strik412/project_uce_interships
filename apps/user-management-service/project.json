@@ -1,0 +1,39 @@
+{
+  "name": "user-management-service",
+  "projectType": "application",
+  "sourceRoot": "apps/user-management-service/src",
+  "prefix": "user-mgmt",
+  "tags": ["app", "users", "scope:users"],
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/user-management-service",
+        "main": "apps/user-management-service/src/main.ts",
+        "tsConfig": "apps/user-management-service/tsconfig.app.json",
+        "webpackConfig": "apps/user-management-service/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "options": {
+        "buildTarget": "user-management-service:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "user-management-service:build:development"
+        },
+        "production": {
+          "buildTarget": "user-management-service:build:production"
+        }
+      }
+    }
+  }
+}
