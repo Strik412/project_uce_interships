@@ -120,17 +120,19 @@ pnpm dev:gateway     # API Gateway only
 
 ## 🔧 Microservices
 
-| Service | Port | Description |
-|---------|------|-------------|
-| **API Gateway** | 4000 | Main entry point, routing, auth middleware |
-| **Auth Service** | 3001 | Authentication, JWT tokens, authorization |
-| **User Management** | 3002 | User CRUD, profiles, roles |
-| **Registration Service** | 3003 | Internship registration, applications |
-| **Tracking Service** | 3004 | Internship progress tracking, milestones |
-| **Communication Service** | 3005 | Internal messaging, notifications queue |
-| **Notification Service** | 3006 | Email, SMS, push notifications |
-| **Document Management** | 3007 | File upload, storage, versioning |
-| **Reporting & Analytics** | 3008 | Reports, dashboards, metrics |
+| Service | Port | Path | Description |
+|---------|------|------|-------------|
+| **API Gateway** | 4000 | — | Main entry point, routing, auth middleware |
+| **Auth Service** | 3001 | `/api/v1` | Authentication, JWT tokens, authorization |
+| **User Management** | 3002 | `/api/v1` | User CRUD, profiles, roles |
+| **Registration Service** | 3003 | `/api/v1` | Internship registration, applications |
+| **Tracking Service** | 3004 | `/` | Internship progress tracking, milestones |
+| **Communication Service** | 3005 | `/api/v1` | Internal messaging, notifications |
+| **Notification Service** | 3006 | `/api/v1` | Email, SMS, push notifications |
+| **Document Management** | 3007 | `/api/v1` | File upload, storage, versioning |
+| **Reporting & Analytics** | 3008 | `/` | Reports, dashboards, metrics |
+
+**Documentation**: Each service has detailed README in `apps/<service>/README.md`
 
 ### Service Health Checks
 
@@ -138,11 +140,28 @@ pnpm dev:gateway     # API Gateway only
 # API Gateway
 curl http://localhost:4000/api/v1/health
 
-# Individual services
-curl http://localhost:3001/api/v1/health  # Auth
-curl http://localhost:3002/api/v1/health  # Users
-curl http://localhost:3003/health         # Registration
+# Individual services  
+curl http://localhost:3001/api/v1/health    # Auth
+curl http://localhost:3002/api/v1/health    # Users
+curl http://localhost:3003/health           # Registration
+curl http://localhost:3004/health           # Tracking
+curl http://localhost:3005/api/v1/health    # Communication
+curl http://localhost:3006/api/v1/health    # Notifications
+curl http://localhost:3007/api/v1/health    # Document Mgmt
+curl http://localhost:3008/api              # Reporting (Swagger)
 ```
+
+### Swagger Documentation
+
+Each service exposes Swagger/OpenAPI docs:
+- **Auth Service**: http://localhost:3001/api/docs
+- **User Management**: http://localhost:3002/api/docs
+- **Registration**: http://localhost:3003/api
+- **Tracking**: http://localhost:3004/api
+- **Communication**: http://localhost:3005/api/docs
+- **Notifications**: http://localhost:3006/api/docs
+- **Document Mgmt**: http://localhost:3007/api/docs
+- **Reporting & Analytics**: http://localhost:3008/api
 
 ## 🗄️ Infrastructure
 
@@ -201,10 +220,17 @@ Password: guest
 
 ## 📚 Documentation
 
-- **Architecture Diagrams**: `diagramas/arquitectura/`
-- **Database Schemas**: `diagramas/base-de-datos/`
-- **Process Flows**: `diagramas/bpmn/`
-- **Service READMEs**: Each service has its own README in `apps/<service>/README.md`
+- **Architecture Diagrams**: `diagramas/arquitectura/` — C4 Model (Context, Container, Components), routing, dependencies
+- **Database Schemas**: `diagramas/base-de-datos/` — ER diagrams for PostgreSQL, MongoDB, Redis
+- **Process Flows**: `diagramas/bpmn/` — End-to-end workflows
+- **Infrastructure**: `diagramas/infraestructura/` — AWS, networking, deployment
+- **UML Diagrams**: `diagramas/uml/` — Class and sequence diagrams
+- **Service READMEs**: Each service in `apps/<service>/README.md` documents endpoints, configuration, and usage
+- **Testing Guide**: `TESTING_GUIDE.md` — Integration and e2e test instructions
+
+### API Documentation
+
+All microservices expose Swagger/OpenAPI documentation. See **Swagger Documentation** section under [Microservices](#microservices) for URLs.
 
 ### Generate Dependency Graph
 
@@ -262,11 +288,17 @@ Final_Project/
 ## 🛠️ Available Scripts
 
 ```bash
-# Development
+# Development (all services)
 pnpm dev:all              # Start all services
 pnpm dev:auth             # Start auth service only
-pnpm dev:users            # Start users service only
+pnpm dev:users            # Start user mgmt only
 pnpm dev:gateway          # Start API gateway only
+pnpm dev:registration     # Start registration only
+pnpm dev:tracking         # Start tracking only
+pnpm dev:communication    # Start communication only
+pnpm dev:notification     # Start notification only
+pnpm dev:document         # Start document mgmt only
+pnpm dev:reporting        # Start reporting/analytics only
 
 # Production
 pnpm start                # Start with Nx
@@ -288,6 +320,7 @@ pnpm format:check         # Check formatting
 # Nx Utilities
 pnpm graph                # View dependency graph
 pnpm affected:build       # Build only affected projects
+pnpm affected:test        # Test only affected projects
 ```
 
 ## 🌩️ AWS Infrastructure (Terraform)
