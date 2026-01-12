@@ -56,3 +56,9 @@ crash.*.log
 # Variables sensibles
 *.tfvars
 *.tfvars.json
+
+#Diagramas
+diagramas
+
+#Scripts
+scripts
