@@ -1,3 +1,6 @@
+# Nx
+.nx/cache/
+
 # Build outputs
 .next/
 dist/
@@ -27,12 +30,6 @@ Thumbs.db
 # Docker
 volumes/
 
-# Terraform
-infra/terraform/**/.terraform/
-infra/terraform/**/.terraform.lock.hcl
-infra/terraform/**/terraform.tfstate*
-infra/terraform/**/*.tfvars
-
 # Test/local scripts
 *.http
 *.log
@@ -47,3 +44,15 @@ create_test_*.sql
 postman-collection.json
 QUICKSTART.bat
 start-auth-service.js
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+.terraform.tfstate.lock.info
+
+# Variables sensibles
+*.tfvars
+*.tfvars.json
