@@ -280,6 +280,41 @@ services:
       - practicas-network
     restart: unless-stopped
 
+      # Document Management Service
+  document-management-service:
+    image: practicas-document-management-service:latest
+    container_name: practicas-document-management-service
+    environment:
+      NODE_ENV: development
+      PORT: 3007
+      JWT_SECRET: dev-shared-jwt-secret
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: practicas_user
+      DB_PASSWORD: practicas_password
+      DB_NAME: practicas_db
+      DB_SYNCHRONIZE: 'true'
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      MONGO_USER: admin
+      MONGO_PASSWORD: admin_password
+      MONGO_DB: practicas
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redis_password
+    ports:
+      - "3007:3007"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - practicas-network
+    restart: unless-stopped
+
   # Web Frontend (Next.js)
   web:
     build:
