@@ -1,52 +1,59 @@
-# Build Stage
+# =========================
+# Build stage
+# =========================
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm@9.0.0
+# Instalar pnpm
+RUN npm install -g pnpm@9
 
-# Copy root workspace files
-COPY package.json pnpm-workspace.yaml ./
-COPY tsconfig.base.json ./
+# Copiar archivos base del monorepo
+COPY package.json pnpm-workspace.yaml tsconfig.base.json ./
 
-# Copy service and shared library
-COPY apps/communication-service ./apps/communication-service
+# 🔽 CAMBIAR SOLO ESTE NOMBRE
+ARG SERVICE_NAME=communication-service
+
+# Copiar el servicio y libs compartidas
+COPY apps/${SERVICE_NAME} ./apps/${SERVICE_NAME}
 COPY libs/shared ./libs/shared
 
-# Install all dependencies
+# Instalar dependencias
 RUN pnpm install
 
-# Build application using Nx
-RUN pnpm exec nx build communication-service
+# Build solo del servicio
+RUN pnpm exec nx build ${SERVICE_NAME} --skip-nx-cache
 
 
-# Runtime Stage
+# =========================
+# Runtime stage
+# =========================
 FROM node:22-alpine
 
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
+# Dependencias mínimas de runtime
 RUN apk add --no-cache dumb-init curl
 
-# Create non-root user
+# Usuario no root
 RUN addgroup -g 1001 app && \
     adduser -D -u 1001 -G app app
 
-# Copy only necessary files from builder
-COPY --from=builder --chown=app:app /app/dist/apps/communication-service ./dist
-COPY --from=builder --chown=app:app /app/node_modules ./node_modules
+# 🔽 CAMBIAR SOLO ESTE NOMBRE
+ARG SERVICE_NAME=communication-service
 
-# Switch to non-root user
+# Copiar build
+COPY --from=builder --chown=app:app /app/dist/apps/${SERVICE_NAME} ./dist
+COPY --from=builder --chown=app:app /app/node_modules ./node_modules
+COPY --from=builder --chown=app:app /app/package.json ./package.json
+
 USER app
 
-# Expose port
-EXPOSE 3005
+# 🔽 CAMBIAR SOLO EL PUERTO
+EXPOSE 3004
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:3005/api/v1/health || exit 1
-
-# Use dumb-init to handle signals properly
+# 🔽 AJUSTA EL PUERTO SI CAMBIA
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+  CMD curl -f http://localhost:3004/api/v1/health || exit 1
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "dist/main.js"]
