@@ -3,7 +3,7 @@ import { MilestoneStatus } from '../../domain/milestone.entity';
 
 export class CreateMilestoneDto {
   @IsUUID()
-  assignmentId!: string;
+  placementId!: string;
 
   @IsString()
   title!: string;

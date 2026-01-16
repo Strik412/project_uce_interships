@@ -19,16 +19,16 @@ export class ProgressRepository {
     return this.repository.findOne({ where: { id } });
   }
 
-  async findByAssignmentId(assignmentId: string): Promise<ProgressReport[]> {
+  async findByPlacementId(placementId: string): Promise<ProgressReport[]> {
     return this.repository.find({
-      where: { assignmentId },
+      where: { placementId },
       order: { weekNumber: 'ASC' },
     });
   }
 
-  async findByAssignmentAndWeek(assignmentId: string, weekNumber: number): Promise<ProgressReport | null> {
+  async findByPlacementAndWeek(placementId: string, weekNumber: number): Promise<ProgressReport | null> {
     return this.repository.findOne({
-      where: { assignmentId, weekNumber },
+      where: { placementId, weekNumber },
     });
   }
 
@@ -46,9 +46,9 @@ export class ProgressRepository {
     });
   }
 
-  async findRecentByAssignment(assignmentId: string, limit: number = 5): Promise<ProgressReport[]> {
+  async findRecentByPlacement(placementId: string, limit: number = 5): Promise<ProgressReport[]> {
     return this.repository.find({
-      where: { assignmentId },
+      where: { placementId },
       order: { reportDate: 'DESC' },
       take: limit,
     });

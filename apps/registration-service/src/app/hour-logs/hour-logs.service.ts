@@ -48,7 +48,7 @@ export class HourLogsService {
   async findAll(userId: string, userRole: string, placementId?: string): Promise<HourLogEntity[]> {
     const query = this.hourLogRepository.createQueryBuilder('log')
       .leftJoinAndSelect('log.placement', 'placement')
-      .leftJoin('placement.practice', 'practice')
+      .leftJoinAndSelect('placement.practice', 'practice')
       .orderBy('log.date', 'DESC');
 
     if (placementId) {
@@ -65,7 +65,7 @@ export class HourLogsService {
       query.andWhere('placement.professorId = :userId', { userId });
     }
 
-    // Company users see logs where they are supervisor OR practice owner
+    // Company users see logs where they are supervisor OR own the practice
     if (userRole === 'company') {
       query.andWhere('(placement.companySupervisorId = :userId OR practice.userId = :userId)', { userId });
     }

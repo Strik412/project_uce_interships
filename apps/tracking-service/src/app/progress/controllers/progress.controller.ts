@@ -18,14 +18,14 @@ export class ProgressController {
     return this.progressService.getProgressById(id);
   }
 
-  @Get('assignment/:assignmentId')
-  async getAssignmentProgress(@Param('assignmentId') assignmentId: string): Promise<ProgressReport[]> {
-    return this.progressService.getAssignmentProgress(assignmentId);
+  @Get('placement/:placementId')
+  async getPlacementProgress(@Param('placementId') placementId: string): Promise<ProgressReport[]> {
+    return this.progressService.getPlacementProgress(placementId);
   }
 
-  @Get('assignment/:assignmentId/stats')
-  async getProgressStats(@Param('assignmentId') assignmentId: string): Promise<ProgressStatsDto> {
-    return this.progressService.getProgressStats(assignmentId);
+  @Get('placement/:placementId/stats')
+  async getProgressStats(@Param('placementId') placementId: string): Promise<ProgressStatsDto> {
+    return this.progressService.getProgressStats(placementId);
   }
 
   @Get()
@@ -33,9 +33,9 @@ export class ProgressController {
     return this.progressService.getPendingReviews();
   }
 
-  @Get('assignment/:assignmentId/recent')
-  async getRecentProgress(@Param('assignmentId') assignmentId: string): Promise<ProgressReport[]> {
-    return this.progressService.getRecentProgress(assignmentId, 5);
+  @Get('placement/:placementId/recent')
+  async getRecentProgress(@Param('placementId') placementId: string): Promise<ProgressReport[]> {
+    return this.progressService.getRecentProgress(placementId, 5);
   }
 
   @Put(':id')

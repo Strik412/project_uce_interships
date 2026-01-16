@@ -19,9 +19,9 @@ export class MilestoneRepository {
     return this.repository.findOne({ where: { id } });
   }
 
-  async findByAssignmentId(assignmentId: string): Promise<Milestone[]> {
+  async findByPlacementId(placementId: string): Promise<Milestone[]> {
     return this.repository.find({
-      where: { assignmentId },
+      where: { placementId },
       order: { dueDate: 'ASC' },
     });
   }
@@ -54,9 +54,9 @@ export class MilestoneRepository {
       .getMany();
   }
 
-  async findCompletedByAssignment(assignmentId: string): Promise<Milestone[]> {
+  async findCompletedByPlacement(placementId: string): Promise<Milestone[]> {
     return this.repository.find({
-      where: { assignmentId, isCompleted: true },
+      where: { placementId, isCompleted: true },
       order: { completedAt: 'DESC' },
     });
   }

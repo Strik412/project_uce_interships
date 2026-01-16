@@ -14,7 +14,7 @@ export class ProgressReport {
   id!: string;
 
   @Column('uuid')
-  assignmentId!: string;
+  placementId!: string;
 
   @Column('integer')
   weekNumber!: number;

@@ -3,7 +3,7 @@ import { ProgressStatus } from '../../domain/progress.entity';
 
 export class CreateProgressDto {
   @IsUUID()
-  assignmentId!: string;
+  placementId!: string;
 
   @IsNumber()
   @Min(1)

@@ -29,8 +29,8 @@ export class MilestoneService {
     return milestone;
   }
 
-  async getAssignmentMilestones(assignmentId: string): Promise<Milestone[]> {
-    return this.milestoneRepository.findByAssignmentId(assignmentId);
+  async getPlacementMilestones(placementId: string): Promise<Milestone[]> {
+    return this.milestoneRepository.findByPlacementId(placementId);
   }
 
   async getMilestonesByStatus(status: MilestoneStatus): Promise<Milestone[]> {
@@ -127,19 +127,19 @@ export class MilestoneService {
     return false;
   }
 
-  async getMilestoneStats(assignmentId: string): Promise<{
+  async getMilestoneStats(placementId: string): Promise<{
     totalMilestones: number;
     completedMilestones: number;
     overdueMilestones: number;
     averageProgress: number;
     completionRate: number;
   }> {
-    const milestones = await this.milestoneRepository.findByAssignmentId(assignmentId);
+    const milestones = await this.milestoneRepository.findByPlacementId(placementId);
 
     const totalMilestones = milestones.length;
-    const completedMilestones = milestones.filter(m => m.isCompleted).length;
-    const overdueMilestones = milestones.filter(m => new Date(m.dueDate) < new Date() && !m.isCompleted).length;
-    const averageProgress = totalMilestones > 0 ? milestones.reduce((sum, m) => sum + m.progress, 0) / totalMilestones : 0;
+    const completedMilestones = milestones.filter((m: Milestone) => m.isCompleted).length;
+    const overdueMilestones = milestones.filter((m: Milestone) => new Date(m.dueDate) < new Date() && !m.isCompleted).length;
+    const averageProgress = totalMilestones > 0 ? milestones.reduce((sum: number, m: Milestone) => sum + m.progress, 0) / totalMilestones : 0;
     const completionRate = totalMilestones > 0 ? (completedMilestones / totalMilestones) * 100 : 0;
 
     return {
@@ -161,7 +161,7 @@ export class MilestoneService {
     return this.milestoneRepository.delete(id);
   }
 
-  async getMilestoneSummary(assignmentId: string): Promise<{
+  async getMilestoneSummary(placementId: string): Promise<{
     milestones: Milestone[];
     stats: {
       totalMilestones: number;
@@ -171,8 +171,8 @@ export class MilestoneService {
       completionRate: number;
     };
   }> {
-    const milestones = await this.getAssignmentMilestones(assignmentId);
-    const stats = await this.getMilestoneStats(assignmentId);
+    const milestones = await this.getPlacementMilestones(placementId);
+    const stats = await this.getMilestoneStats(placementId);
 
     return {
       milestones,

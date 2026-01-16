@@ -9,8 +9,8 @@ export class ProgressService {
 
   async submitProgress(createDto: CreateProgressDto): Promise<ProgressReport> {
     // Validar que no exista un reporte para la misma semana
-    const existingReport = await this.progressRepository.findByAssignmentAndWeek(
-      createDto.assignmentId,
+    const existingReport = await this.progressRepository.findByPlacementAndWeek(
+      createDto.placementId,
       createDto.weekNumber,
     );
 
@@ -33,22 +33,22 @@ export class ProgressService {
     return report;
   }
 
-  async getAssignmentProgress(assignmentId: string): Promise<ProgressReport[]> {
-    return this.progressRepository.findByAssignmentId(assignmentId);
+  async getPlacementProgress(placementId: string): Promise<ProgressReport[]> {
+    return this.progressRepository.findByPlacementId(placementId);
   }
 
-  async getProgressStats(assignmentId: string): Promise<{
+  async getProgressStats(placementId: string): Promise<{
     totalReports: number;
     approvedReports: number;
     totalHours: number;
     averageHoursPerWeek: number;
     approvalRate: number;
   }> {
-    const reports = await this.progressRepository.findByAssignmentId(assignmentId);
+    const reports = await this.progressRepository.findByPlacementId(placementId);
 
     const totalReports = reports.length;
-    const approvedReports = reports.filter(r => r.status === ProgressStatus.APPROVED).length;
-    const totalHours = reports.reduce((sum, r) => sum + r.hoursWorked, 0);
+    const approvedReports = reports.filter((r: ProgressReport) => r.status === ProgressStatus.APPROVED).length;
+    const totalHours = reports.reduce((sum: number, r: ProgressReport) => sum + r.hoursWorked, 0);
     const averageHoursPerWeek = totalReports > 0 ? totalHours / totalReports : 0;
     const approvalRate = totalReports > 0 ? (approvedReports / totalReports) * 100 : 0;
 
@@ -146,7 +146,7 @@ export class ProgressService {
     return this.progressRepository.delete(id);
   }
 
-  async getRecentProgress(assignmentId: string, limit: number = 5): Promise<ProgressReport[]> {
-    return this.progressRepository.findRecentByAssignment(assignmentId, limit);
+  async getRecentProgress(placementId: string, limit: number = 5): Promise<ProgressReport[]> {
+    return this.progressRepository.findRecentByPlacement(placementId, limit);
   }
 }

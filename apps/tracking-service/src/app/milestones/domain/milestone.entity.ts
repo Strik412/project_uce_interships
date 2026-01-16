@@ -13,7 +13,7 @@ export class Milestone {
   id!: string;
 
   @Column('uuid')
-  assignmentId!: string;
+  placementId!: string;
 
   @Column('varchar')
   title!: string;

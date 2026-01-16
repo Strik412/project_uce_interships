@@ -18,22 +18,22 @@ export class MilestoneController {
     return this.milestoneService.getMilestoneById(id);
   }
 
-  @Get('assignment/:assignmentId')
-  async getAssignmentMilestones(@Param('assignmentId') assignmentId: string): Promise<Milestone[]> {
-    return this.milestoneService.getAssignmentMilestones(assignmentId);
+  @Get('placement/:placementId')
+  async getPlacementMilestones(@Param('placementId') placementId: string): Promise<Milestone[]> {
+    return this.milestoneService.getPlacementMilestones(placementId);
   }
 
-  @Get('assignment/:assignmentId/stats')
-  async getMilestoneStats(@Param('assignmentId') assignmentId: string): Promise<MilestoneStatsDto> {
-    return this.milestoneService.getMilestoneStats(assignmentId);
+  @Get('placement/:placementId/stats')
+  async getMilestoneStats(@Param('placementId') placementId: string): Promise<MilestoneStatsDto> {
+    return this.milestoneService.getMilestoneStats(placementId);
   }
 
-  @Get('assignment/:assignmentId/summary')
-  async getMilestoneSummary(@Param('assignmentId') assignmentId: string): Promise<{
+  @Get('placement/:placementId/summary')
+  async getMilestoneSummary(@Param('placementId') placementId: string): Promise<{
     milestones: Milestone[];
     stats: MilestoneStatsDto;
   }> {
-    return this.milestoneService.getMilestoneSummary(assignmentId);
+    return this.milestoneService.getMilestoneSummary(placementId);
   }
 
   @Get('status/overdue')
