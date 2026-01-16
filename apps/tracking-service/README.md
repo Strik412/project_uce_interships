@@ -1,80 +1,67 @@
 # Tracking Service
 
-> Tracks practice assignments, weekly progress, and milestones for the Professional Internship Management Platform
+> Optional service for tracking progress reports and milestones for the Professional Internship Management Platform
 
-**Port:** 3004  
+**Port:** 3005  
 **Framework:** NestJS 10 (TypeScript)  
 **Database:** PostgreSQL (TypeORM)  
-**Messaging:** Kafka (event publishing)  
 **Docs:** Swagger at `/api`
 
 ## Overview
-The Tracking Service manages assignment lifecycles, weekly progress reviews, and milestone delivery tracking. It enforces status state machines, emits domain events to Kafka, and exposes JWT-protected REST endpoints.
+The Tracking Service is an **optional monitoring service** that provides progress report and milestone tracking. It links to placements (via placementId) from the Registration Service. This service enables detailed progress monitoring without duplicating core assignment logic which is handled by the Registration Service.
+
+**Note:** This service is optional and not required for core functionality. The Registration Service handles all placement and hour log workflows.
 
 ## Features
-- Assignments: CRUD, hour tracking, activate/pause/resume/complete
-- Progress: weekly submissions, approve/reject/request revision, stats
-- Milestones: create/update, progress %, complete, overdue/upcoming summaries
-- Events: publishes assignment/progress/milestone events to Kafka topics
-- Security: global JWT + roles guards, request validation (whitelist/forbid), CORS
-- Docs: Swagger with bearer auth, local dev server preset
+- **Progress Reports:** Weekly progress submissions linked to placements
+- **Milestones:** Create and track project milestones
+- **Statistics:** Progress stats and completion tracking
+- **Approval Workflow:** Approve/reject/request revision on progress reports
+- **Security:** JWT authentication with role-based access
+- **Documentation:** Swagger API documentation
 
 ## Architecture
-- **API:** Controllers for assignments, progress, milestones
-- **Domain/Data:** TypeORM entities (`PracticeAssignment`, `ProgressReport`, `Milestone`)
-- **Infra:** Kafka publisher (`tracking-event.publisher.ts`), in-memory cache helper
-- **Cross-cutting:** Global `JwtAuthGuard` + `RolesGuard`, `ValidationPipe`, CORS
+- **API:** Controllers for progress and milestones
+- **Domain/Data:** TypeORM entities (`ProgressReport`, `Milestone`)
+- **Linked to:** Registration Service placements via `placementId`
+- **Security:** Global `JwtAuthGuard` + `RolesGuard`, validation, CORS
 
-## API Endpoints (base `/` on port 3004)
+## API Endpoints (base `/api/v1/` on port 3005)
 All endpoints require a bearer token (JWT) via the API Gateway/Auth service.
 
-### Assignments
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/assignments` | Create assignment |
-| GET | `/assignments/:id` | Get assignment |
-| GET | `/assignments/student/:studentId` | Assignments by student |
-| GET | `/assignments/company/:companyId` | Assignments by company |
-| GET | `/assignments/supervisor/:supervisorId` | Assignments supervised |
-| GET | `/assignments/status/active` | Active assignments |
-| PUT | `/assignments/:id` | Update assignment |
-| PUT | `/assignments/:id/progress` | Update completed hours |
-| POST | `/assignments/:id/activate` | Transition to ACTIVE |
-| POST | `/assignments/:id/complete` | Transition to COMPLETED |
-| POST | `/assignments/:id/pause` | Transition to PAUSED |
-| POST | `/assignments/:id/resume` | Resume from PAUSED |
-| DELETE | `/assignments/:id` | Delete assignment |
+### Notes
+- Placement assignments are managed in **Registration Service** (not here)
+- Progress and Milestones are linked to placements via `placementId`
 
-### Progress
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/progress` | Submit weekly progress |
-| GET | `/progress/:id` | Get progress report |
-| GET | `/progress/assignment/:assignmentId` | Reports for assignment |
-| GET | `/progress/assignment/:assignmentId/stats` | Progress statistics |
-| GET | `/progress` | Pending reviews |
-| GET | `/progress/assignment/:assignmentId/recent` | Recent reports (default 5) |
-| PUT | `/progress/:id` | Update progress report |
-| POST | `/progress/:id/approve` | Approve report |
-| POST | `/progress/:id/reject` | Reject report |
-| POST | `/progress/:id/request-revision` | Request revision |
-| DELETE | `/progress/:id` | Delete report |
+### Progress Reports
+| Method | Path | Description | Auth Required |
+|--------|------|-------------|---------------|
+| POST | `/progress` | Submit weekly progress report | ✅ Yes (student) |
+| GET | `/progress/:id` | Get progress report | ✅ Yes |
+| GET | `/progress/placement/:placementId` | Reports for placement | ✅ Yes |
+| GET | `/progress/placement/:placementId/stats` | Progress statistics | ✅ Yes |
+| GET | `/progress/placement/:placementId/recent` | Recent reports (default 5) | ✅ Yes |
+| PATCH | `/progress/:id` | Update progress report | ✅ Yes (student) |
+| PATCH | `/progress/:id/approve` | Approve report | ✅ Yes (professor, company) |
+| PATCH | `/progress/:id/reject` | Reject report | ✅ Yes (professor, company) |
+| PATCH | `/progress/:id/request-revision` | Request revision | ✅ Yes |
+| DELETE | `/progress/:id` | Delete report | ✅ Yes (student) |
 
 ### Milestones
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/milestones` | Create milestone |
-| GET | `/milestones/:id` | Get milestone |
-| GET | `/milestones/assignment/:assignmentId` | Milestones for assignment |
-| GET | `/milestones/assignment/:assignmentId/stats` | Milestone statistics |
-| GET | `/milestones/assignment/:assignmentId/summary` | Summary (list + stats) |
-| GET | `/milestones/status/overdue` | Overdue milestones |
-| GET | `/milestones/status/upcoming` | Upcoming milestones |
-| PUT | `/milestones/:id` | Update milestone |
-| PUT | `/milestones/:id/progress` | Update progress % |
-| POST | `/milestones/:id/complete` | Mark complete |
-| POST | `/milestones/:id/check-overdue` | Check/update overdue flag |
-| DELETE | `/milestones/:id` | Delete milestone |
+| Method | Path | Description | Auth Required |
+|--------|------|-------------|---------------|
+| POST | `/milestones` | Create milestone | ✅ Yes (professor, company) |
+| GET | `/milestones/:id` | Get milestone | ✅ Yes |
+| GET | `/milestones/placement/:placementId` | Milestones for placement | ✅ Yes |
+| GET | `/milestones/placement/:placementId/stats` | Milestone statistics | ✅ Yes |
+| GET | `/milestones/placement/:placementId/summary` | Summary (list + stats) | ✅ Yes |
+| GET | `/milestones/status/overdue` | Overdue milestones | ✅ Yes |
+| GET | `/milestones/status/upcoming` | Upcoming milestones | ✅ Yes |
+| PATCH | `/milestones/:id` | Update milestone | ✅ Yes (professor, company) |
+| PATCH | `/milestones/:id/progress` | Update progress % | ✅ Yes |
+| POST | `/milestones/:id/complete` | Mark complete | ✅ Yes |
+| POST | `/milestones/:id/check-overdue` | Check/update overdue flag | ✅ Yes |
+| DELETE | `/milestones/:id` | Delete milestone | ✅ Yes (professor, company) |
 
 ### Docs
 - Swagger UI: `/api` (auth: bearer)

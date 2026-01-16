@@ -23,12 +23,18 @@ This platform provides a comprehensive solution for managing professional intern
 
 The platform follows a microservices architecture with the following key components:
 
-- **API Gateway**: Centralized entry point with routing, authentication, and rate limiting
-- **9 Specialized Microservices**: Each handling a specific domain
-- **Multiple Databases**: PostgreSQL, MongoDB, and Redis
-- **Message Broker**: RabbitMQ for asynchronous communication
-- **MQTT Broker**: Mosquitto for real-time notifications
-- **Monitoring**: Prometheus & Grafana for observability
+### Core Services (Production Ready)
+- **API Gateway** (Port 4000): Centralized entry point with routing and authentication
+- **Auth Service** (Port 3001): JWT authentication and token management
+- **User Management Service** (Port 3002): User profiles and role management
+- **Registration Service** (Port 3003): Practices, applications, placements, and hour logs
+- **Tracking Service** (Port 3005): Progress reports and milestone tracking (optional)
+
+### Infrastructure
+- **Databases**: PostgreSQL (primary), MongoDB (documents), Redis (caching)
+- **Message Brokers**: RabbitMQ, Kafka, Mosquitto
+- **Monitoring**: Prometheus & Grafana
+- **Email Testing**: MailHog for local email testing
 
 ### Architecture Diagrams
 
@@ -68,9 +74,9 @@ Before running the project, ensure you have:
 
 - **Node.js**: >= 20.0.0
 - **pnpm**: >= 9.0.0
-- **Docker**: >= 20.x
-- **Docker Compose**: >= 2.x
+- **Docker Desktop**: >= 4.x (includes Docker & Docker Compose)
 - **Git**: Latest version
+- **Windows PowerShell** (for Windows) or **Bash** (for Linux/Mac)
 
 ## 🚀 Getting Started
 
@@ -86,17 +92,40 @@ git clone <https://github.com/Strik412/project_uce_interships.git>
 pnpm install
 ```
 
-### 3. Start Infrastructure (Databases & Brokers)
+### 3. Start All Services (Databases, Brokers & Microservices)
 
 ```bash
-# Windows
-.\scripts\start-databases.bat
+# Windows PowerShell
+cd Final_Project
+docker compose up -d
 
 # Linux/Mac
-./scripts/start-databases.sh
-
-# Or using Docker Compose directly
+cd Final_Project
 docker-compose up -d
+```
+
+### 4. Access the Application
+
+- **Frontend**: http://localhost:3000
+- **API Gateway**: http://localhost:4000
+- **Swagger Docs**: http://localhost:4000/api
+- **MailHog (Email Testing)**: http://localhost:8025
+
+### 5. Test the System
+
+**Default Test Credentials:**
+```
+Student:
+  Email: student@example.com
+  Password: password123
+
+Teacher:
+  Email: teacher@example.com
+  Password: password123
+
+Company:
+  Email: company@example.com
+  Password: password123
 ```
 
 ### 4. Start All Microservices
@@ -120,15 +149,27 @@ pnpm dev:gateway     # API Gateway only
 
 ## 🔧 Microservices
 
-| Service | Port | Path | Description |
-|---------|------|------|-------------|
-| **API Gateway** | 4000 | — | Main entry point, routing, auth middleware |
-| **Auth Service** | 3001 | `/api/v1` | Authentication, JWT tokens, authorization |
-| **User Management** | 3002 | `/api/v1` | User CRUD, profiles, roles |
-| **Registration Service** | 3003 | `/api/v1` | Internship registration, applications |
-| **Tracking Service** | 3004 | `/` | Internship progress tracking, milestones |
-| **Communication Service** | 3005 | `/api/v1` | Internal messaging, notifications |
-| **Notification Service** | 3006 | `/api/v1` | Email, SMS, push notifications |
+### Core Workflow (Registration Service)
+Handles the complete internship workflow:
+- **Practices**: Companies create internship offerings
+- **Applications**: Students apply for practices
+- **Placements**: Approved applications → internship assignments
+- **Hour Logs**: Time tracking with dual approval (teacher + company)
+
+### Optional Features (Tracking Service)
+Enhances monitoring and progress tracking:
+- **Progress Reports**: Weekly progress submissions
+- **Milestones**: Project milestone tracking
+
+See individual README files in each service directory for detailed documentation.
+
+| Service | Port | Description |
+|---------|------|-------------|
+| **API Gateway** | 4000 | Main entry point, routing, authentication |
+| **Auth Service** | 3001 | JWT authentication and token management |
+| **User Management** | 3002 | User profiles and role management |
+| **Registration Service** | 3003 | Practices, applications, placements, hour logs |
+| **Tracking Service** | 3005 | Progress reports and milestones (optional) |
 | **Document Management** | 3007 | `/api/v1` | File upload, storage, versioning |
 | **Reporting & Analytics** | 3008 | `/` | Reports, dashboards, metrics |
 

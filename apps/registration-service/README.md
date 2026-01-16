@@ -1,21 +1,21 @@
 # Registration Service
 
-> Manages internship practices, student applications, and assignment lifecycle for the Professional Internship Management Platform
+> Manages internship practices, student applications, placements, and hour logging for the Professional Internship Management Platform
 
 ## 📋 Overview
 
-The Registration Service handles the full lifecycle of internship practices and applications. It allows admins to publish practices, students to submit applications, and supervisors/admins to review, approve, or reject them. It provides pagination, role-based access control, and status tracking for all registrations.
+The Registration Service is the core of the platform. It handles the complete internship lifecycle: from creating practices and managing applications, through approving placements, to tracking hours with dual approval workflows (teacher + company approval required).
 
 ## ✨ Key Features
 
-- 📑 **Practice Management** - Create, list, update, and delete internship practices
-- 📝 **Application Management** - Students apply to practices; admins/supervisors review
-- 🔒 **Role-Based Access** - Public listing, protected mutations with role guards
-- 📊 **Pagination & Filtering** - Query practices and applications with paging
-- ✅ **Status Tracking** - Application status updates with rejection reasons
+- 📑 **Practice Management** - Companies create internship offerings
+- 📝 **Application Management** - Students apply for practices
+- 🎯 **Placement Management** - Assign professors and company supervisors to approved applications
+- ⏱️ **Hour Logging** - Students log hours; dual approval (teacher + company) required
+- 🔒 **Role-Based Access** - Student, professor, company, admin roles with proper permissions
+- 📊 **Pagination & Filtering** - Query all resources with paging and filtering
+- ✅ **Dual Approval Workflow** - Hours require both teacher and company approval before completion
 - 🧭 **OpenAPI Docs** - Swagger UI for all endpoints
-- 🧹 **Validation** - DTO validation with whitelisting and forbidden unknown props
-- 🌐 **CORS** - Configurable allowed origins
 
 ## 📦 Tech Stack
 
@@ -50,6 +50,34 @@ The Registration Service handles the full lifecycle of internship practices and 
 | GET | `/api/v1/applications/:id` | Get application by ID | ❌ Public |
 | PATCH | `/api/v1/applications/:id` | Update application status | ✅ Yes (admin, supervisor) |
 | DELETE | `/api/v1/applications/:id` | Delete application | ✅ Yes (admin) |
+
+### Placement Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/v1/placements` | List placements (filtered by user role) | ✅ Yes |
+| GET | `/api/v1/placements/:id` | Get placement details | ✅ Yes |
+| PATCH | `/api/v1/placements/:id/assign-professor` | Assign professor to placement | ✅ Yes (admin) |
+| PATCH | `/api/v1/placements/:id/assignment` | Assign company supervisor | ✅ Yes (admin, company) |
+| PATCH | `/api/v1/placements/:id/status` | Update placement status | ✅ Yes (admin) |
+
+### Hour Logs Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/v1/hour-logs` | Student submits hour log | ✅ Yes (student) |
+| GET | `/api/v1/hour-logs` | List hour logs (filtered by role) | ✅ Yes |
+| GET | `/api/v1/hour-logs/:id` | Get hour log details | ✅ Yes |
+| PATCH | `/api/v1/hour-logs/:id` | Update pending hour log | ✅ Yes (student) |
+| PATCH | `/api/v1/hour-logs/:id/review` | Approve/reject hour log | ✅ Yes (professor, company) |
+| DELETE | `/api/v1/hour-logs/:id` | Delete hour log | ✅ Yes (student) |
+| GET | `/api/v1/hour-logs/stats/:placementId` | Get hour statistics | ✅ Yes |
+
+**Hour Log Approval Workflow:**
+- Student submits hours → Status: PENDING
+- Professor approves → teacherApprovedBy set
+- Company approves → companyApprovedBy set
+- Both approved → Status: APPROVED (hours added to placement total)
 
 ### Health & Documentation
 
