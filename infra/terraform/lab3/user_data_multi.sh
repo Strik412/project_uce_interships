@@ -10,49 +10,48 @@ systemctl enable --now docker
 usermod -a -G docker ec2-user
 
 # -----------------------------
-# Install AWS CLI v2 (for ECR)
+# Install AWS CLI v2
 # -----------------------------
-curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+curl -fsSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o /tmp/awscliv2.zip
 yum install -y unzip
 unzip -q /tmp/awscliv2.zip -d /tmp
 /tmp/aws/install
 
 # -----------------------------
-# Authenticate to ECR
+# Login to ECR
 # -----------------------------
 aws ecr get-login-password --region ${aws_region} \
   | docker login --username AWS --password-stdin ${ecr_registry}
 
 # -----------------------------
-# Docker network (shared)
+# Docker network
 # -----------------------------
 docker network create practicas_net || true
 
 # -----------------------------
-# Helper function to run a service
+# Run service helper
 # -----------------------------
 run_service() {
   NAME="$1"
   PORT="$2"
   IMAGE_REPO="$3"
 
-  IMAGE="${ecr_registry}/$${IMAGE_REPO}:latest"
+  IMAGE="${ecr_registry}/${IMAGE_REPO}:latest"
 
-  echo "Starting service: $${NAME} on port $${PORT} using image $${IMAGE}"
+  echo "Starting $NAME on port $PORT"
 
-  docker pull "$${IMAGE}"
+  docker pull "$IMAGE"
 
-  # Remove existing container if present
-  if docker ps -a --format '{{.Names}}' | grep -q "^$${NAME}$"; then
-    docker rm -f "$${NAME}" || true
+  if docker ps -a --format '{{.Names}}' | grep -q "^${NAME}$"; then
+    docker rm -f "${NAME}"
   fi
 
   docker run -d \
-    --name "$${NAME}" \
+    --name "${NAME}" \
     --network practicas_net \
     --restart unless-stopped \
-    -p "$${PORT}:$${PORT}" \
-    -e PORT="$${PORT}" \
+    -p "${PORT}:${PORT}" \
+    -e PORT="${PORT}" \
     -e NODE_ENV=production \
     -e DATABASE_URL="postgresql://${db_user}:${db_password}@${db_host}:${db_port}/${db_name}" \
     -e REDIS_URL="redis://${redis_host}:${redis_port}" \
@@ -64,11 +63,11 @@ run_service() {
     -e NOTIFICATION_SERVICE_URL="http://notification-service:3005" \
     -e DOCUMENT_SERVICE_URL="http://document-management-service:3006" \
     -e REPORTING_SERVICE_URL="http://reporting-service:3007" \
-    "$${IMAGE}"
+    "$IMAGE"
 }
 
 # -----------------------------
-# Start all services in this group
+# Start services
 # -----------------------------
 %{ for service in services ~}
 run_service "${service.name}" "${service.port}" "${service.ecr_name}"
