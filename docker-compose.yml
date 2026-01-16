@@ -10,7 +10,7 @@ services:
       POSTGRES_INITDB_ARGS: "--encoding=UTF8"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/
     ports:
       - "5432:5432"
     healthcheck:
@@ -243,6 +243,34 @@ services:
       REDIS_PASSWORD: redis_password
     ports:
       - "3003:3003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - practicas-network
+    restart: unless-stopped
+
+  # Tracking Service
+  tracking-service:
+    image: practicas-tracking-service:latest
+    container_name: practicas-tracking-service
+    environment:
+      NODE_ENV: development
+      PORT: 3005
+      JWT_SECRET: dev-shared-jwt-secret
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: practicas_user
+      DB_PASSWORD: practicas_password
+      DB_NAME: practicas_db
+      DB_SYNCHRONIZE: 'true'
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redis_password
+    ports:
+      - "3005:3005"
     depends_on:
       postgres:
         condition: service_healthy
