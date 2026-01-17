@@ -306,6 +306,16 @@ export class GatewayController {
     return this.proxyToService('documents', path, req, res);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @All('certificates*')
+  @ApiBearerAuth()
+  @Throttle({ long: { limit: 100, ttl: 60000 } })
+  @ApiExcludeEndpoint()
+  async certificatesProxy(@Req() req: Request, @Res() res: Response) {
+    const path = req.url.replace('/api/v1', '');
+    return this.proxyToService('documents', path, req, res);
+  }
+
   // ==========================================
   // REPORTING & ANALYTICS SERVICE PROXY
   // ==========================================
