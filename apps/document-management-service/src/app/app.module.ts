@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
 import { DocumentModule } from './documents/document.module';
 import { TemplateModule } from './documents/template.module';
+import { CertificateModule } from './certificates/certificate.module';
 import { getTypeOrmConfig } from '../database/typeorm.config';
 import { SharedAuthModule, JwtAuthGuard, RolesGuard } from '@app/shared';
 
@@ -20,6 +21,7 @@ import { SharedAuthModule, JwtAuthGuard, RolesGuard } from '@app/shared';
     SharedAuthModule,
     DocumentModule,
     TemplateModule,
+    CertificateModule,
   ],
   providers: [
     {
