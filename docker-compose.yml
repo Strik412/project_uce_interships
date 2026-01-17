@@ -213,7 +213,7 @@ services:
       COMMUNICATION_SERVICE_URL: http://communication-service:3004
       TRACKING_SERVICE_URL: http://tracking-service:3005
       NOTIFICATION_SERVICE_URL: http://notification-service:3006
-      DOCUMENT_MANAGEMENT_SERVICE_URL: http://document-management-service:3007
+      DOCUMENT_SERVICE_URL: http://document-management-service:3007
       REPORTING_SERVICE_URL: http://reporting-service:3008
     ports:
       - "4000:4000"
