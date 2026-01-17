@@ -285,6 +285,7 @@ export default function DashboardPage() {
           <div style={{ display: 'flex', gap: 10 }}>
             <span className="pill">Rol: {primaryRole}</span>
             <Link className="link" href="/hour-logs">Registro de Horas</Link>
+            <Link className="link" href="/certificates">Certificados</Link>
             <Link className="link" href="/profile">Perfil</Link>
             <button onClick={handleLogout}>Cerrar sesión</button>
           </div>
