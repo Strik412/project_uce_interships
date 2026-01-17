@@ -1,14 +1,18 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PlacementEntity, PlacementStatus, AssignmentStatus } from '../database/entities/placement.entity';
 import { CreatePlacementDto, UpdatePlacementDto } from './dto/placement.dto';
+import { CertificateIntegrationService } from '../services/certificate-integration.service';
 
 @Injectable()
 export class PlacementsService {
+  private readonly logger = new Logger(PlacementsService.name);
+
   constructor(
     @InjectRepository(PlacementEntity)
     private readonly placementRepository: Repository<PlacementEntity>,
+    private readonly certificateIntegrationService: CertificateIntegrationService,
   ) {}
 
   async create(dto: CreatePlacementDto): Promise<PlacementEntity> {
@@ -98,8 +102,18 @@ export class PlacementsService {
       throw new ForbiddenException('Only coordinator or admin can update status');
     }
 
+    // Check if placement is transitioning to COMPLETED status
+    const isCompletionTransition = dto.status === PlacementStatus.COMPLETED && placement.status !== PlacementStatus.COMPLETED;
+
     Object.assign(placement, dto);
-    return await this.placementRepository.save(placement);
+    const updatedPlacement = await this.placementRepository.save(placement);
+
+    // Trigger certificate generation when placement is marked as COMPLETED
+    if (isCompletionTransition) {
+      await this.triggerCertificateGeneration(updatedPlacement);
+    }
+
+    return updatedPlacement;
   }
 
   async updateHours(
@@ -162,5 +176,43 @@ export class PlacementsService {
       placement.professorId = null as any; // clear professor assignment
     }
     return await this.placementRepository.save(placement);
+  }
+
+  private async triggerCertificateGeneration(placement: PlacementEntity): Promise<void> {
+    try {
+      this.logger.log(`Triggering certificate generation for placement ${placement.id}`);
+
+      // Get the practice details to retrieve practice name
+      const placementWithRelations = await this.placementRepository.findOne({
+        where: { id: placement.id },
+        relations: ['practice'],
+      });
+
+      if (!placementWithRelations?.practice) {
+        this.logger.warn(`Could not find practice details for placement ${placement.id}`);
+        return;
+      }
+
+      // For now, use placeholder values - in a production system, you'd fetch actual user names from user service
+      // This is a simplified implementation. In real scenario, you'd call User Management Service to get full names
+      const payload = {
+        placementId: placement.id,
+        studentId: placement.studentId,
+        studentName: `Student ${placement.studentId}`, // TODO: Fetch from User Management Service
+        professorId: placement.professorId || '',
+        professorName: placement.professorId ? `Professor ${placement.professorId}` : 'Unassigned', // TODO: Fetch from User Management Service
+        practiceName: placementWithRelations.practice.companyName || 'Professional Practice',
+        totalHours: Number(placement.completedHours) || 0,
+        startDate: placement.startDate,
+        endDate: placement.endDate,
+      };
+
+      await this.certificateIntegrationService.generateCertificate(payload);
+    } catch (error) {
+      this.logger.error(
+        `Error triggering certificate generation for placement ${placement.id}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      // Don't throw - certificate generation failure shouldn't block the placement completion
+    }
   }
 }
