@@ -165,4 +165,29 @@ export interface Application {
   updatedAt: string;
 }
 
+export interface Certificate {
+  id: string;
+  placementId: string;
+  studentId: string;
+  professorId: string;
+  certificateNumber: string;
+  issueDate: string;
+  totalHours: number;
+  practiceName: string;
+  studentName: string;
+  professorName: string;
+  startDate: string;
+  endDate: string;
+  pdfUrl?: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'REVOKED';
+  approvedBy?: string;
+  approvedAt?: string;
+  approvalComments?: string;
+  rejectedBy?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export { API_BASE_URL };
