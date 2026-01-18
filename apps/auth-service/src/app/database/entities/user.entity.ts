@@ -11,37 +11,40 @@ export class UserEntity {
   @Column({ type: 'varchar', unique: true })
   email: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', name: 'firstName' })
   firstName: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', name: 'lastName' })
   lastName: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', name: 'passwordHash' })
   passwordHash: string;
 
-  @Column({ type: 'enum', enum: UserRole, array: true, default: [UserRole.STUDENT] })
+  @Column({
+  type: 'simple-array',
+  default: UserRole.STUDENT,
+  })
   roles: UserRole[];
 
-  @Column({ type: 'boolean', default: true })
+
+  @Column({ type: 'boolean', name: 'isActive', default: true })
   isActive: boolean;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ type: 'boolean', name: 'emailVerified', default: false })
   emailVerified: boolean;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar', name: 'emailVerificationToken', nullable: true })
   emailVerificationToken: string | null;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamp', name: 'lastLogin', nullable: true })
   lastLogin: Date | null;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'timestamp', name: 'createdAt' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ type: 'timestamp', name: 'updatedAt' })
   updatedAt: Date;
 
-  // Relations
   @OneToMany('RefreshTokenEntity', (token: any) => token.user, { cascade: true })
   refreshTokens: RefreshTokenEntity[];
 
