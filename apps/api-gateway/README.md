@@ -118,7 +118,7 @@ GET    /api/v1/health                 # Gateway health check
 
 ### Protected Endpoints (JWT Required)
 
-All other endpoints require a valid JWT token in the authorization header:
+All other endpoints require a valid JWT token in the Authorization header:
 
 ```http
 Authorization: Bearer <your-jwt-token>
