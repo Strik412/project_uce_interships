@@ -39,6 +39,10 @@ RUN apk add --no-cache dumb-init curl
 RUN addgroup -g 1001 app && \
     adduser -D -u 1001 -G app app
 
+# Crear directorio de uploads con permisos correctos
+RUN mkdir -p /app/uploads && \
+    chown -R app:app /app/uploads
+
 # 🔽 CAMBIAR SOLO ESTE NOMBRE
 ARG SERVICE_NAME=document-management-service
 
