@@ -36,7 +36,6 @@ services:
       MONGO_INITDB_DATABASE: practicas
     volumes:
       - mongodb_data:/data/db
-      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/init.js:ro
     ports:
       - "27017:27017"
     healthcheck:
@@ -69,8 +68,8 @@ services:
     container_name: practicas-rabbitmq
     restart: unless-stopped
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: practicas
+      RABBITMQ_DEFAULT_PASS: practicas_password
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     ports:
@@ -112,18 +111,20 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     volumes:
       - kafka_data:/var/lib/kafka/data
     ports:
-      - "9092:9092"
+      - "29092:29092"
     networks:
       - practicas-network
 
   mailhog:
     image: mailhog/mailhog:latest
     container_name: practicas-mailhog
+    restart: unless-stopped
     ports:
       - "1025:1025"
       - "8025:8025"
@@ -290,6 +291,8 @@ services:
       - auth-service
       - user-management-service
       - registration-service
+      - tracking-service
+      - document-management-service
     networks:
       - practicas-network
 
@@ -301,7 +304,7 @@ services:
     restart: unless-stopped
     environment:
       NEXT_PUBLIC_API_BASE_URL: http://api-gateway:4000
-      NODE_ENV: production
+      NODE_ENV: development
     ports:
       - "3000:3000"
     depends_on:
