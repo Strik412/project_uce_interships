@@ -12,7 +12,10 @@ export class PracticesService {
   ) {}
 
   async create(dto: CreatePracticeDto): Promise<PracticeEntity> {
-    const practice = this.practicesRepository.create(dto);
+    const practice = this.practicesRepository.create({
+      ...dto,
+      user: { id: dto.userId },
+    });
     return this.practicesRepository.save(practice);
   }
 
