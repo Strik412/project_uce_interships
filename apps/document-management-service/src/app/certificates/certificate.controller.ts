@@ -9,6 +9,7 @@ import {
   Res,
   HttpStatus,
   HttpCode,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -35,7 +36,7 @@ export class CertificateController {
   constructor(private certificateService: CertificateService) {}
 
   @Post('generate')
-  @Roles('admin', 'teacher', 'student')
+  @Roles('admin', 'professor', 'teacher', 'student')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Generate certificate for completed placement' })
   @ApiResponse({ status: 201, description: 'Certificate generated', type: Certificate })
@@ -43,38 +44,26 @@ export class CertificateController {
     return this.certificateService.generateCertificate(dto);
   }
 
+  @Post('request/:placementId')
+  @Roles('student')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Student requests certificate for their completed placement' })
+  @ApiResponse({ status: 201, description: 'Certificate request created', type: Certificate })
+  async requestCertificate(
+    @Param('placementId') placementId: string,
+    @CurrentUser() user: CurrentUserData,
+  ): Promise<Certificate> {
+    // This will create a certificate in PENDING status for teacher approval
+    // The actual certificate data will be fetched from the placement service
+    return this.certificateService.requestCertificateByStudent(placementId, user.userId);
+  }
+
   @Get('placement/:placementId')
-  @Roles('student', 'teacher', 'admin')
+  @Roles('student', 'professor', 'teacher', 'admin')
   @ApiOperation({ summary: 'Get certificate by placement ID' })
   @ApiResponse({ status: 200, description: 'Certificate found', type: Certificate })
   async getCertificateByPlacement(@Param('placementId') placementId: string) {
     return this.certificateService.getCertificateByPlacement(placementId);
-  }
-
-  @Get('student/:studentId')
-  @Roles('student', 'teacher', 'admin')
-  @ApiOperation({ summary: 'Get all certificates for a student' })
-  @ApiResponse({ status: 200, description: 'List of certificates', type: [Certificate] })
-  async getCertificatesByStudent(@Param('studentId') studentId: string): Promise<Certificate[]> {
-    return this.certificateService.getCertificatesByStudent(studentId);
-  }
-
-  @Get('professor/:professorId')
-  @Roles('teacher', 'admin')
-  @ApiOperation({ summary: 'Get all certificates for a professor' })
-  @ApiResponse({ status: 200, description: 'List of certificates', type: [Certificate] })
-  async getCertificatesByProfessor(
-    @Param('professorId') professorId: string,
-  ): Promise<Certificate[]> {
-    return this.certificateService.getCertificatesByProfessor(professorId);
-  }
-
-  @Get('pending')
-  @Roles('teacher', 'admin')
-  @ApiOperation({ summary: 'Get all pending certificates' })
-  @ApiResponse({ status: 200, description: 'List of pending certificates', type: [Certificate] })
-  async getPendingCertificates(): Promise<Certificate[]> {
-    return this.certificateService.getPendingCertificates();
   }
 
   @Get('student/me')
@@ -85,8 +74,34 @@ export class CertificateController {
     return this.certificateService.getCertificatesByStudent(user.userId);
   }
 
+  @Get('student/:studentId')
+  @Roles('student', 'professor', 'teacher', 'admin')
+  @ApiOperation({ summary: 'Get all certificates for a student' })
+  @ApiResponse({ status: 200, description: 'List of certificates', type: [Certificate] })
+  async getCertificatesByStudent(@Param('studentId') studentId: string): Promise<Certificate[]> {
+    return this.certificateService.getCertificatesByStudent(studentId);
+  }
+
+  @Get('professor/:professorId')
+  @Roles('professor', 'teacher', 'admin')
+  @ApiOperation({ summary: 'Get all certificates for a professor' })
+  @ApiResponse({ status: 200, description: 'List of certificates', type: [Certificate] })
+  async getCertificatesByProfessor(
+    @Param('professorId') professorId: string,
+  ): Promise<Certificate[]> {
+    return this.certificateService.getCertificatesByProfessor(professorId);
+  }
+
+  @Get('pending')
+  @Roles('professor', 'teacher', 'admin')
+  @ApiOperation({ summary: 'Get all pending certificates' })
+  @ApiResponse({ status: 200, description: 'List of pending certificates', type: [Certificate] })
+  async getPendingCertificates(): Promise<Certificate[]> {
+    return this.certificateService.getPendingCertificates();
+  }
+
   @Get(':id')
-  @Roles('student', 'teacher', 'admin')
+  @Roles('student', 'professor', 'teacher', 'admin')
   @ApiOperation({ summary: 'Get certificate by ID' })
   @ApiResponse({ status: 200, description: 'Certificate details', type: Certificate })
   async getCertificate(@Param('id') id: string): Promise<Certificate> {
@@ -94,25 +109,33 @@ export class CertificateController {
   }
 
   @Patch(':id/approve')
-  @Roles('teacher', 'admin')
+  @Roles('professor', 'teacher', 'admin')
   @ApiOperation({ summary: 'Approve a pending certificate' })
   @ApiResponse({ status: 200, description: 'Certificate approved', type: Certificate })
   async approveCertificate(
     @Param('id') id: string,
     @Body() dto: ApproveCertificateDto,
+    @CurrentUser() user: CurrentUserData,
+    @Req() req: any,
   ): Promise<Certificate> {
-    return this.certificateService.approveCertificate(id, dto.teacherId, dto.comments);
+    return this.certificateService.approveCertificate(
+      id,
+      user.userId,
+      dto.comments,
+      req.headers?.authorization,
+    );
   }
 
   @Patch(':id/reject')
-  @Roles('teacher', 'admin')
+  @Roles('professor', 'teacher', 'admin')
   @ApiOperation({ summary: 'Reject a pending certificate' })
   @ApiResponse({ status: 200, description: 'Certificate rejected', type: Certificate })
   async rejectCertificate(
     @Param('id') id: string,
     @Body() dto: RejectCertificateDto,
+    @CurrentUser() user: CurrentUserData,
   ): Promise<Certificate> {
-    return this.certificateService.rejectCertificate(id, dto.teacherId, dto.reason);
+    return this.certificateService.rejectCertificate(id, user.userId, dto.reason);
   }
 
   @Patch(':id/revoke')
@@ -127,7 +150,7 @@ export class CertificateController {
   }
 
   @Get(':id/download')
-  @Roles('student', 'teacher', 'admin')
+  @Roles('student', 'professor', 'teacher', 'admin')
   @ApiOperation({ summary: 'Download certificate PDF' })
   @ApiResponse({ status: 200, description: 'PDF file stream' })
   async downloadCertificate(@Param('id') id: string, @Res() res: Response) {
