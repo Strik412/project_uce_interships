@@ -124,6 +124,8 @@ export default function CertificateReviewPage() {
     );
   }
 
+  const normalizedStatus = certificate?.status?.toUpperCase();
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -175,7 +177,7 @@ export default function CertificateReviewPage() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900">Certificate Details</h2>
                 <span className="px-3 py-1 text-sm font-medium rounded-full bg-yellow-100 text-yellow-800">
-                  {certificate.status}
+                  {normalizedStatus}
                 </span>
               </div>
 
@@ -222,7 +224,7 @@ export default function CertificateReviewPage() {
             </div>
 
             {/* Approval Form */}
-            {certificate.status === 'PENDING' && (
+            {normalizedStatus === 'PENDING' && (
               <div className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Review Decision</h3>
 
@@ -292,12 +294,12 @@ export default function CertificateReviewPage() {
             )}
 
             {/* Already Reviewed */}
-            {certificate.status !== 'PENDING' && (
+            {normalizedStatus !== 'PENDING' && (
               <div className="p-6">
                 <div className="text-center py-6">
                   <p className="text-gray-600">
                     This certificate has already been reviewed and marked as{' '}
-                    <strong>{certificate.status}</strong>.
+                    <strong>{normalizedStatus}</strong>.
                   </p>
                 </div>
               </div>

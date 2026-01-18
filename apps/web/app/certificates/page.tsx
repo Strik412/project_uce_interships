@@ -5,16 +5,18 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { loadToken, clearToken } from '../../lib/storage';
 import { getRolesFromToken, isTokenExpired } from '../../lib/auth';
-import { getJson } from '../../lib/api';
-import type { Certificate } from '../../lib/api';
+import { getJson, postJson } from '../../lib/api';
+import type { Certificate, Placement } from '../../lib/api';
 
 export default function CertificatesPage() {
   const router = useRouter();
   const [token, setToken] = useState('');
   const [roles, setRoles] = useState<string[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [placements, setPlacements] = useState<Placement[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const primaryRole = roles[0] ?? 'guest';
   const isStudent = primaryRole === 'student';
@@ -35,6 +37,10 @@ export default function CertificatesPage() {
   useEffect(() => {
     if (!token) return;
     loadCertificates();
+    if (isStudent) {
+      loadPlacements();
+    }
+    console.log('DEBUG: Certificates page loaded - primaryRole:', primaryRole, 'isStudent:', isStudent, 'isProfessor:', isProfessor, 'isAdmin:', isAdmin);
   }, [token, primaryRole]);
 
   async function loadCertificates() {
@@ -56,6 +62,7 @@ export default function CertificatesPage() {
 
       if (endpoint) {
         const data = await getJson<Certificate[]>(endpoint, token);
+        console.log('DEBUG: Loaded certificates from', endpoint, '- Count:', data?.length, '- Data:', JSON.stringify(data));
         setCertificates(data || []);
       }
     } catch (err) {
@@ -65,10 +72,69 @@ export default function CertificatesPage() {
     }
   }
 
-  function handleDownload(certId: string) {
-    // Open in new tab or trigger download
-    const downloadUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000/api/v1'}/certificates/${certId}/download`;
-    window.open(downloadUrl, '_blank');
+  async function loadPlacements() {
+    try {
+      const data = await getJson<Placement[]>('placements', token);
+      setPlacements(data || []);
+    } catch (err) {
+      console.error('Error loading placements:', err);
+    }
+  }
+
+  async function handleRequestCertificate(placementId: string) {
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    try {
+      await postJson<Certificate>(`certificates/request/${placementId}`, {}, token);
+      setSuccess('Certificate requested successfully! Awaiting teacher approval.');
+      await loadCertificates();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error requesting certificate');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDownload(certId: string) {
+    try {
+      setLoading(true);
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000/api/v1';
+      
+      // Fetch the PDF with auth header
+      const response = await fetch(`${apiUrl}/certificates/${certId}/download`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Download failed: ${response.status}`);
+      }
+
+      // Get the PDF as a blob
+      const blob = await response.blob();
+      
+      // Create a temporary URL for the blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary link and trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `certificate-${certId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      setSuccess('Certificate downloaded successfully!');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error downloading certificate');
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleLogout() {
@@ -77,86 +143,116 @@ export default function CertificatesPage() {
   }
 
   function getStatusBadgeColor(status: string) {
-    switch (status) {
+    const normalizedStatus = status?.toUpperCase();
+    switch (normalizedStatus) {
       case 'APPROVED':
-        return 'bg-green-100 text-green-800';
+        return 'badge-approved';
       case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'badge-pending';
       case 'REJECTED':
-        return 'bg-red-100 text-red-800';
+        return 'badge-rejected';
       case 'REVOKED':
-        return 'bg-gray-100 text-gray-800';
+        return 'badge-revoked';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'badge-revoked';
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {isStudent ? 'My Certificates' : isProfessor ? 'Certificate Approvals' : 'Certificates Management'}
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              {isStudent
-                ? 'View and download your internship completion certificates'
-                : 'Review and approve student certificates'}
-            </p>
-          </div>
-          <div className="flex gap-4">
-            <Link
-              href="/dashboard"
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-            >
-              ← Back to Dashboard
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-            >
-              Logout
-            </button>
-          </div>
+    <div className="page-shell">
+      <header className="top-bar">
+        <div>
+          <h1>{isStudent ? 'My Certificates' : isProfessor ? 'Certificate Approvals' : 'Certificates Management'}</h1>
+          <p className="subtext">
+            {isStudent
+              ? 'View and download your internship completion certificates'
+              : 'Review and approve student certificates'}
+          </p>
+        </div>
+        <div className="top-actions">
+          <Link href="/dashboard" className="button button-ghost">
+            ← Back to Dashboard
+          </Link>
+          <button onClick={handleLogout} className="button button-danger">
+            Logout
+          </button>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main>
         {/* Error Display */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-800">{error}</p>
+          <div className="card error-card">
+            <p>{error}</p>
+          </div>
+        )}
+
+        {/* Success Display */}
+        {success && (
+          <div className="card success-card">
+            <p>{success}</p>
+          </div>
+        )}
+
+        {/* Request Certificate Section - Students Only */}
+        {isStudent && placements.length > 0 && (
+          <div className="card">
+            <div className="section-title">
+              <h2>Request Certificate</h2>
+            </div>
+            <p className="small">
+              You can request a certificate for placements where all hours have been approved by both teacher and company.
+            </p>
+            <div className="card-stack">
+              {placements
+                .filter(p => {
+                  const completed = typeof p.completedHours === 'string' ? parseFloat(p.completedHours) : p.completedHours;
+                  const expected = p.expectedHours;
+                  const hasExistingCert = certificates.some(c => c.placementId === p.id);
+                  return completed >= expected && !hasExistingCert;
+                })
+                .map(placement => {
+                  const completed = typeof placement.completedHours === 'string' ? parseFloat(placement.completedHours) : placement.completedHours;
+                  return (
+                    <div key={placement.id} className="card compact">
+                      <div className="flex-between">
+                        <div>
+                          <p className="strong">{placement.practice?.companyName || placement.practiceId?.slice(0, 8) || 'N/A'}</p>
+                          <p className="small">{completed}h / {placement.expectedHours}h completed</p>
+                          <p className="micro">{new Date(placement.startDate).toLocaleDateString()} - {new Date(placement.endDate).toLocaleDateString()}</p>
+                        </div>
+                        <button onClick={() => handleRequestCertificate(placement.id)} disabled={loading}>
+                          Request Certificate
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              {placements.filter(p => {
+                const completed = typeof p.completedHours === 'string' ? parseFloat(p.completedHours) : p.completedHours;
+                const hasExistingCert = certificates.some(c => c.placementId === p.id);
+                return completed >= p.expectedHours && !hasExistingCert;
+              }).length === 0 && (
+                <p className="small" style={{ textAlign: 'center', padding: '8px 0' }}>
+                  No eligible placements for certificate request. Complete all required hours first.
+                </p>
+              )}
+            </div>
           </div>
         )}
 
         {/* Loading State */}
         {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">Loading certificates...</p>
+          <div className="card" style={{ textAlign: 'center' }}>
+            <p>Loading certificates...</p>
           </div>
         )}
 
         {/* Certificates List */}
         {!loading && certificates.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-lg shadow">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No certificates found</h3>
-            <p className="mt-1 text-sm text-gray-500">
+          <div className="card" style={{ textAlign: 'center' }}>
+            <h3>No certificates found</h3>
+            <p className="small">
               {isStudent
                 ? 'Your certificates will appear here once your internship is completed and approved.'
                 : 'No pending certificates to review at this time.'}
@@ -165,121 +261,87 @@ export default function CertificatesPage() {
         )}
 
         {!loading && certificates.length > 0 && (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="card-grid">
             {certificates.map((cert) => (
-              <div
-                key={cert.id}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6"
-              >
-                {/* Certificate Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                      {cert.practiceName}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      Certificate #{cert.certificateNumber}
-                    </p>
+              <div key={cert.id} className="card certificate-card">
+                <div className="card-top">
+                  <div>
+                    <p className="eyebrow">Certificate #{cert.certificateNumber}</p>
+                    <h3>{cert.practiceName || 'Internship Program'}</h3>
                   </div>
-                  <span
-                    className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeColor(
-                      cert.status
-                    )}`}
-                  >
-                    {cert.status}
+                  <span className={`badge ${getStatusBadgeColor(cert.status)}`}>
+                    {cert.status?.toUpperCase()}
                   </span>
                 </div>
 
-                {/* Certificate Details */}
-                <div className="space-y-2 text-sm mb-4">
+                <div className="meta">
                   {isStudent && (
                     <>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Student:</span>
-                        <span className="font-medium text-gray-900">{cert.studentName}</span>
+                      <div className="meta-row">
+                        <span>Student</span>
+                        <strong>{cert.studentName || 'N/A'}</strong>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Professor:</span>
-                        <span className="font-medium text-gray-900">{cert.professorName}</span>
+                      <div className="meta-row">
+                        <span>Professor</span>
+                        <strong>{cert.professorName || 'N/A'}</strong>
                       </div>
                     </>
                   )}
                   {isProfessor && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Student:</span>
-                      <span className="font-medium text-gray-900">{cert.studentName}</span>
+                    <div className="meta-row">
+                      <span>Student</span>
+                      <strong>{cert.studentName || 'N/A'}</strong>
                     </div>
                   )}
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Hours Completed:</span>
-                    <span className="font-medium text-gray-900">{cert.totalHours}h</span>
+                  <div className="meta-row">
+                    <span>Hours Completed</span>
+                    <strong>{cert.totalHours || 'N/A'}h</strong>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Period:</span>
-                    <span className="font-medium text-gray-900">
-                      {new Date(cert.startDate).toLocaleDateString()} -{' '}
-                      {new Date(cert.endDate).toLocaleDateString()}
-                    </span>
+                  <div className="meta-row">
+                    <span>Period</span>
+                    <strong>
+                      {cert.startDate ? new Date(cert.startDate).toLocaleDateString() : 'N/A'} - {cert.endDate ? new Date(cert.endDate).toLocaleDateString() : 'N/A'}
+                    </strong>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Issue Date:</span>
-                    <span className="font-medium text-gray-900">
-                      {new Date(cert.issueDate).toLocaleDateString()}
-                    </span>
+                  <div className="meta-row">
+                    <span>Issue Date</span>
+                    <strong>{cert.issueDate ? new Date(cert.issueDate).toLocaleDateString() : 'N/A'}</strong>
                   </div>
                 </div>
 
-                {/* Approval/Rejection Info */}
-                {cert.status === 'APPROVED' && cert.approvedAt && (
-                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
-                    <p className="text-xs text-green-800">
-                      <strong>Approved:</strong>{' '}
-                      {new Date(cert.approvedAt).toLocaleDateString()}
+                {cert.status?.toUpperCase() === 'APPROVED' && cert.approvedAt && (
+                  <div className="callout callout-success">
+                    <p>
+                      <strong>Approved:</strong> {new Date(cert.approvedAt).toLocaleDateString()}
                     </p>
-                    {cert.approvalComments && (
-                      <p className="text-xs text-green-700 mt-1">{cert.approvalComments}</p>
-                    )}
+                    {cert.approvalComments && <p className="micro">{cert.approvalComments}</p>}
                   </div>
                 )}
 
-                {cert.status === 'REJECTED' && cert.rejectedAt && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                    <p className="text-xs text-red-800">
-                      <strong>Rejected:</strong>{' '}
-                      {new Date(cert.rejectedAt).toLocaleDateString()}
+                {cert.status?.toUpperCase() === 'REJECTED' && cert.rejectedAt && (
+                  <div className="callout callout-danger">
+                    <p>
+                      <strong>Rejected:</strong> {new Date(cert.rejectedAt).toLocaleDateString()}
                     </p>
-                    {cert.rejectionReason && (
-                      <p className="text-xs text-red-700 mt-1">{cert.rejectionReason}</p>
-                    )}
+                    {cert.rejectionReason && <p className="micro">{cert.rejectionReason}</p>}
                   </div>
                 )}
 
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  {isStudent && cert.status === 'APPROVED' && (
-                    <button
-                      onClick={() => handleDownload(cert.id)}
-                      className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                    >
-                      Download PDF
-                    </button>
+                <div className="actions">
+                  {isStudent && cert.status?.toUpperCase() === 'APPROVED' && (
+                    <button onClick={() => handleDownload(cert.id)}>Download PDF</button>
                   )}
 
-                  {isProfessor && cert.status === 'PENDING' && (
-                    <>
-                      <Link
-                        href={`/certificates/${cert.id}/review` as any}
-                        className="flex-1 px-4 py-2 text-sm font-medium text-center text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                      >
-                        Review
-                      </Link>
-                    </>
+                  {isProfessor && cert.status?.toUpperCase() === 'PENDING' && (
+                    <Link href={`/certificates/${cert.id}/review` as any} className="button">
+                      Review
+                    </Link>
                   )}
 
-                  {isStudent && cert.status === 'PENDING' && (
-                    <div className="flex-1 text-center text-sm text-gray-500 py-2">
+                  {isStudent && cert.status?.toUpperCase() === 'PENDING' && (
+                    <span className="small" style={{ textAlign: 'center', width: '100%' }}>
                       Awaiting approval
-                    </div>
+                    </span>
                   )}
                 </div>
               </div>
