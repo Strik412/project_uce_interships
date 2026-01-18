@@ -92,7 +92,7 @@ export class AuthService {
 
     // Guardar refresh token en PostgreSQL
     const refreshTokenExpiry = new Date(Date.now() + this.refreshTokenTtl * 1000);
-    await this.refreshTokenRepository.create(user.id, refreshToken, refreshTokenExpiry);
+    await this.refreshTokenRepository.create(user, refreshToken, refreshTokenExpiry);
 
     // Cache de sesión en Redis con TTL
     await this.cacheService.set(
@@ -137,7 +137,7 @@ export class AuthService {
       // Revocar token anterior y guardar el nuevo
       await this.refreshTokenRepository.revokeToken(refreshTokenValue);
       const refreshTokenExpiry = new Date(Date.now() + this.refreshTokenTtl * 1000);
-      await this.refreshTokenRepository.create(user.id, newRefreshToken, refreshTokenExpiry);
+      await this.refreshTokenRepository.create(user, newRefreshToken, refreshTokenExpiry);
 
       // Actualizar sesión en Redis
       await this.cacheService.set(
