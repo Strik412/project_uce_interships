@@ -12,7 +12,8 @@ export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOpt
     password: configService.get<string>('DB_PASSWORD', 'practicas_password'),
     database: configService.get<string>('DB_NAME', 'practicas_db'),
     entities: [Notification, NotificationTemplate],
-    synchronize: true,
+    // Schema is managed via migrations only - never auto-sync
+    synchronize: false,
     logging: configService.get<boolean>('DB_LOGGING', true),
     dropSchema: false,
   };
