@@ -59,8 +59,10 @@ export default function HourLogsPage() {
     setError('');
     try {
       const data = await getJson<Placement[]>('placements', tkn);
+      console.log('Placements loaded:', data);
       setPlacements(data || []);
       if (data && data.length > 0) {
+        console.log('First placement:', data[0]);
         setSelectedPlacement(data[0]);
         await loadHourLogs(tkn, data[0].id);
         await loadStats(tkn, data[0].id);
@@ -143,7 +145,7 @@ export default function HourLogsPage() {
     try {
       await patchJson<HourLog>(
         `hour-logs/${logId}/review`,
-        { status, reviewerComments: comments },
+        { status: status.toLowerCase(), reviewerComments: comments },
         token
       );
       
@@ -257,7 +259,15 @@ export default function HourLogsPage() {
           >
             {placements.map(p => (
               <option key={p.id} value={p.id}>
-                Práctica: {p.practiceId.slice(0, 8)} - {p.status}
+                {(() => {
+                  console.log('Rendering placement option:', p);
+                  const practiceCode = p.practiceId || p.practice?.id;
+                  console.log('Practice code:', practiceCode);
+                  if (!practiceCode) return `Práctica: N/D - ${p.status}`;
+                  const shortCode = practiceCode.slice(0, 8);
+                  const companyLabel = p.practice?.companyName ? ` · ${p.practice.companyName}` : '';
+                  return `Práctica: ${shortCode}${companyLabel} - ${p.status}`;
+                })()}
               </option>
             ))}
           </select>
@@ -495,6 +505,9 @@ function HourLogCard({ log, isStudent, isProfessor, isCompany = false, onReview,
   const [showReview, setShowReview] = useState(false);
   const [reviewComments, setReviewComments] = useState('');
 
+  // Normalize status to uppercase for comparison
+  const normalizedStatus = (log.status || '').toUpperCase();
+
   const statusConfig = {
     PENDING: {
       badge: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
@@ -513,12 +526,16 @@ function HourLogCard({ log, isStudent, isProfessor, isCompany = false, onReview,
     },
   };
 
-  const config = statusConfig[log.status];
+  const config = statusConfig[normalizedStatus as keyof typeof statusConfig] || {
+    badge: 'bg-gray-100 text-gray-800 border border-gray-200',
+    icon: '?',
+    label: log.status || 'Desconocido'
+  };
   
   // Check partial approvals
   const teacherApproved = !!log.teacherApprovedBy;
   const companyApproved = !!log.companyApprovedBy;
-  const isPending = log.status === 'PENDING';
+  const isPending = normalizedStatus === 'PENDING';
 
   return (
     <div className="px-6 py-5 hover:bg-gray-50 transition">
@@ -632,7 +649,7 @@ function HourLogCard({ log, isStudent, isProfessor, isCompany = false, onReview,
         </div>
         
         <div className="ml-4 flex flex-col space-y-2 min-w-max">
-          {isStudent && log.status === 'PENDING' && (
+          {isStudent && normalizedStatus === 'PENDING' && (
             <button
               onClick={() => onDelete(log.id)}
               disabled={loading}
@@ -642,7 +659,7 @@ function HourLogCard({ log, isStudent, isProfessor, isCompany = false, onReview,
             </button>
           )}
           
-          {(isProfessor || isCompany) && log.status === 'PENDING' && (
+          {(isProfessor || isCompany) && normalizedStatus === 'PENDING' && (
             <>
               {!showReview ? (
                 <button
