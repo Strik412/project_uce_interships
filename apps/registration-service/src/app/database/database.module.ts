@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { PracticeEntity, ApplicationEntity, AssignmentEntity, PlacementEntity, HourLogEntity } from './entities';
+import { PracticeEntity, ApplicationEntity, AssignmentEntity, PlacementEntity, HourLogEntity, UserEntity } from './entities';
 
 @Module({
   imports: [
@@ -13,7 +13,7 @@ import { PracticeEntity, ApplicationEntity, AssignmentEntity, PlacementEntity, H
         username: configService.get('DB_USER', 'practicas_user'),
         password: configService.get('DB_PASSWORD', 'practicas_password'),
         database: configService.get('DB_NAME', 'practicas_db'),
-        entities: [PracticeEntity, ApplicationEntity, AssignmentEntity, PlacementEntity, HourLogEntity],
+        entities: [UserEntity, PracticeEntity, ApplicationEntity, AssignmentEntity, PlacementEntity, HourLogEntity],
         // Schema is managed via migrations only - never auto-sync
         synchronize: false,
         logging: configService.get('DB_LOGGING', false),
@@ -22,7 +22,7 @@ import { PracticeEntity, ApplicationEntity, AssignmentEntity, PlacementEntity, H
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([PracticeEntity, ApplicationEntity, AssignmentEntity, PlacementEntity, HourLogEntity]),
+    TypeOrmModule.forFeature([UserEntity, PracticeEntity, ApplicationEntity, AssignmentEntity, PlacementEntity, HourLogEntity]),
   ],
   exports: [TypeOrmModule],
 })
