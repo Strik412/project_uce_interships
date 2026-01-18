@@ -260,6 +260,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: redis_password
+      REGISTRATION_SERVICE_URL: http://registration-service:3003
     ports:
       - "3007:3007"
     depends_on:
