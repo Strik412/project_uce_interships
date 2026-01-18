@@ -48,10 +48,6 @@ export class GenerateCertificateDto {
 }
 
 export class ApproveCertificateDto {
-  @ApiProperty({ description: 'Teacher/Professor ID who is approving' })
-  @IsUUID()
-  teacherId!: string;
-
   @ApiProperty({ description: 'Optional approval comments', required: false })
   @IsOptional()
   @IsString()
@@ -59,10 +55,6 @@ export class ApproveCertificateDto {
 }
 
 export class RejectCertificateDto {
-  @ApiProperty({ description: 'Teacher/Professor ID who is rejecting' })
-  @IsUUID()
-  teacherId!: string;
-
   @ApiProperty({ description: 'Reason for rejection' })
   @IsString()
   reason!: string;
