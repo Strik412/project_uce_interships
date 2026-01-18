@@ -17,9 +17,19 @@ export class PlacementsService {
 
   async create(dto: CreatePlacementDto): Promise<PlacementEntity> {
     const placement = this.placementRepository.create({
-      ...dto,
       status: PlacementStatus.ACTIVE,
       completedHours: 0,
+      expectedHours: dto.expectedHours,
+      startDate: dto.startDate as any,
+      endDate: dto.endDate as any,
+      coordinatorNotes: dto.coordinatorNotes,
+      companySupervisorId: dto.companySupervisorId,
+      professorId: dto.professorId,
+      assignmentStatus: AssignmentStatus.PENDING,
+      // Set relations explicitly to populate FK columns
+      student: { id: dto.studentId } as any,
+      practice: { id: dto.practiceId } as any,
+      application: dto.applicationId ? ({ id: dto.applicationId } as any) : undefined,
     });
 
     return await this.placementRepository.save(placement);
@@ -28,10 +38,12 @@ export class PlacementsService {
   async findAll(userId: string, userRole: string): Promise<PlacementEntity[]> {
     // Students see only their own placements
     if (userRole === 'student') {
-      return await this.placementRepository.find({
-        where: { studentId: userId },
-        relations: ['practice', 'application'],
-      });
+      return await this.placementRepository.createQueryBuilder('placement')
+        .leftJoinAndSelect('placement.student', 'student')
+        .leftJoinAndSelect('placement.practice', 'practice')
+        .leftJoinAndSelect('placement.application', 'application')
+        .where('student.id = :userId', { userId })
+        .getMany();
     }
 
     // Professors see only their assigned placements
@@ -46,8 +58,9 @@ export class PlacementsService {
     if (userRole === 'company') {
       return await this.placementRepository.createQueryBuilder('placement')
         .leftJoinAndSelect('placement.practice', 'practice')
+        .leftJoinAndSelect('practice.user', 'user')
         .leftJoinAndSelect('placement.application', 'application')
-        .where('practice.userId = :userId', { userId })
+        .where('user.id = :userId', { userId })
         .orWhere('placement.companySupervisorId = :userId', { userId })
         .getMany();
     }
@@ -69,7 +82,7 @@ export class PlacementsService {
     }
 
     // Check access permissions
-    if (userRole === 'student' && placement.studentId !== userId) {
+    if (userRole === 'student' && placement.student?.id !== userId) {
       throw new ForbiddenException('You can only view your own placements');
     }
 
@@ -127,7 +140,7 @@ export class PlacementsService {
 
   async updateStatus(
     id: string,
-    status: PlacementStatus,
+    status: typeof PlacementStatus[keyof typeof PlacementStatus],
     userId: string,
     userRole: string,
   ): Promise<PlacementEntity> {
@@ -135,10 +148,11 @@ export class PlacementsService {
   }
 
   async findByPractice(practiceId: string): Promise<PlacementEntity | null> {
-    return await this.placementRepository.findOne({
-      where: { practiceId },
-      relations: ['practice', 'application'],
-    });
+    return await this.placementRepository.createQueryBuilder('placement')
+      .leftJoinAndSelect('placement.practice', 'practice')
+      .leftJoinAndSelect('placement.application', 'application')
+      .where('practice.id = :practiceId', { practiceId })
+      .getOne();
   }
 
   async assignProfessor(
@@ -197,8 +211,8 @@ export class PlacementsService {
       // This is a simplified implementation. In real scenario, you'd call User Management Service to get full names
       const payload = {
         placementId: placement.id,
-        studentId: placement.studentId,
-        studentName: `Student ${placement.studentId}`, // TODO: Fetch from User Management Service
+        studentId: placement.student?.id || '',
+        studentName: `Student ${placement.student?.id}`, // TODO: Fetch from User Management Service
         professorId: placement.professorId || '',
         professorName: placement.professorId ? `Professor ${placement.professorId}` : 'Unassigned', // TODO: Fetch from User Management Service
         practiceName: placementWithRelations.practice.companyName || 'Professional Practice',
