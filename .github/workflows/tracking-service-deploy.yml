@@ -13,7 +13,7 @@ env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: practicas-tracking-service
   SERVICE_NAME: tracking-service
-  ASG_NAME: practicas-tracking-service-asg
+  ASG_NAME: practicas-business-asg
 
 jobs:
   build-and-push:

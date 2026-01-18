@@ -13,7 +13,7 @@ env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: practicas-api-gateway
   SERVICE_NAME: api-gateway
-  ASG_NAME: practicas-api-gateway-asg
+  ASG_NAME: practicas-gateway-asg
 
 jobs:
   build-and-push:

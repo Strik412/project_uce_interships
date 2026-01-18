@@ -13,7 +13,7 @@ env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: practicas-reporting-service
   SERVICE_NAME: reporting-service
-  ASG_NAME: practicas-reporting-service-asg
+  ASG_NAME: practicas-support2-asg
 
 jobs:
   build-and-push:

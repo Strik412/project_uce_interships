@@ -13,7 +13,7 @@ env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: practicas-notification-service
   SERVICE_NAME: notification-service
-  ASG_NAME: practicas-notification-service-asg
+  ASG_NAME: practicas-support1-asg
 
 jobs:
   build-and-push:

@@ -13,7 +13,7 @@ env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: practicas-auth-service
   SERVICE_NAME: auth-service
-  ASG_NAME: practicas-auth-service-asg
+  ASG_NAME: practicas-auth_user-asg
 
 jobs:
   build-and-push:

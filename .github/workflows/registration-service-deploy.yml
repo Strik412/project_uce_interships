@@ -13,7 +13,7 @@ env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: practicas-registration-service
   SERVICE_NAME: registration-service
-  ASG_NAME: practicas-registration-service-asg
+  ASG_NAME: practicas-business-asg
 
 jobs:
   build-and-push:
