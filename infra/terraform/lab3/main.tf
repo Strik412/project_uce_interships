@@ -30,100 +30,34 @@ locals {
     auth_user = {
       main_service = "auth-service"
       services = [
-        { name = "auth-service",     port = 3001, ecr_name = "practicas-auth-service" },
-        { name = "user-management",  port = 3002, ecr_name = "practicas-user-management" }
+        { name = "auth-service", port = 3001, ecr_name = "practicas-auth-service" },
+        { name = "user-management", port = 3002, ecr_name = "practicas-user-management" }
       ]
     }
     business = {
       main_service = "registration-service"
       services = [
         { name = "registration-service", port = 3003, ecr_name = "practicas-registration-service" },
-        { name = "tracking-service",     port = 3008, ecr_name = "practicas-tracking-service" }
+        { name = "tracking-service", port = 3008, ecr_name = "practicas-tracking-service" }
       ]
     }
     support1 = {
       main_service = "communication-service"
       services = [
         { name = "communication-service", port = 3004, ecr_name = "practicas-communication-service" },
-        { name = "notification-service",  port = 3005, ecr_name = "practicas-notification-service" }
+        { name = "notification-service", port = 3005, ecr_name = "practicas-notification-service" }
       ]
     }
     support2 = {
       main_service = "document-management-service"
       services = [
         { name = "document-management-service", port = 3006, ecr_name = "practicas-document-management-service" },
-        { name = "reporting-service",           port = 3007, ecr_name = "practicas-reporting-service" }
+        { name = "reporting-service", port = 3007, ecr_name = "practicas-reporting-service" }
       ]
     }
   }
 }
 
-# IAM Role for EC2 instances (ECR access, CloudWatch logs, ASG operations)
-data "aws_iam_policy_document" "ec2_assume" {
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role" "ec2_role" {
-  name               = "practicas-ec2-role"
-  assume_role_policy = data.aws_iam_policy_document.ec2_assume.json
-}
-
-# Policy for ECR authentication and image pull
-data "aws_iam_policy_document" "ecr_access" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "ecr:GetAuthorizationToken",
-      "ecr:BatchGetImage",
-      "ecr:GetDownloadUrlForLayer"
-    ]
-    resources = ["*"]
-  }
-}
-
-resource "aws_iam_role_policy" "ecr_access" {
-  name   = "practicas-ecr-access"
-  role   = aws_iam_role.ec2_role.id
-  policy = data.aws_iam_policy_document.ecr_access.json
-}
-
-# Policy for CloudWatch Logs
-data "aws_iam_policy_document" "cloudwatch_logs" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-      "logs:DescribeLogStreams"
-    ]
-    resources = ["arn:aws:logs:${var.aws_region}:*:*"]
-  }
-}
-
-resource "aws_iam_role_policy" "cloudwatch_logs" {
-  name   = "practicas-cloudwatch-logs"
-  role   = aws_iam_role.ec2_role.id
-  policy = data.aws_iam_policy_document.cloudwatch_logs.json
-}
-
-# Policy for Systems Manager (optional but useful for automation)
-resource "aws_iam_role_policy_attachment" "ssm_managed" {
-  role       = aws_iam_role.ec2_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "practicas-ec2-profile"
-  role = aws_iam_role.ec2_role.name
-}
 
 # Get latest Amazon Linux 2 AMI
 data "aws_ami" "amazon_linux_2" {
@@ -149,14 +83,14 @@ resource "aws_launch_template" "group" {
   image_id      = data.aws_ami.amazon_linux_2.id
   instance_type = var.instance_type
 
-  iam_instance_profile {
-    arn = aws_iam_instance_profile.ec2_profile.arn
-  }
 
   vpc_security_group_ids = [var.app_security_group_id]
 
   user_data = base64encode(templatefile("${path.module}/user_data_multi.sh", {
-    services     = each.value.services
+    run_services_block = join("\n", [
+      for svc in each.value.services :
+        "run_service \"${svc.name}\" \"${svc.port}\" \"${svc.ecr_name}\""
+    ])
     ecr_registry = var.ecr_registry_url
     db_host      = var.database_endpoint
     db_port      = var.database_port
@@ -188,12 +122,12 @@ resource "aws_autoscaling_group" "group" {
   name                = "practicas-${each.key}-asg"
   vpc_zone_identifier = var.subnet_ids
   # Attach only the main service target group for this functional group
-  target_group_arns   = [var.target_group_arns[each.value.main_service]]
-  health_check_type   = "ELB"
+  target_group_arns         = [var.target_group_arns[each.value.main_service]]
+  health_check_type         = "ELB"
   health_check_grace_period = 300
-  min_size            = var.asg_min
-  max_size            = var.asg_max
-  desired_capacity    = var.asg_desired
+  min_size                  = var.asg_min
+  max_size                  = var.asg_max
+  desired_capacity          = var.asg_desired
 
   launch_template {
     id      = aws_launch_template.group[each.key].id
