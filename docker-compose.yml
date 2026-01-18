@@ -1,8 +1,13 @@
+
 services:
-  # PostgreSQL - Main Database
+  # ============================================
+  # DATABASES & INFRASTRUCTURE
+  # ============================================
+
   postgres:
     image: postgres:16-alpine
     container_name: practicas-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: practicas_user
       POSTGRES_PASSWORD: practicas_password
@@ -10,7 +15,7 @@ services:
       POSTGRES_INITDB_ARGS: "--encoding=UTF8"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init.sql:/docker-entrypoint-initdb.d/
+      - ./scripts/init:/docker-entrypoint-initdb.d:ro
     ports:
       - "5432:5432"
     healthcheck:
@@ -21,17 +26,17 @@ services:
     networks:
       - practicas-network
 
-  # MongoDB - Document Database
   mongodb:
     image: mongo:7.0
     container_name: practicas-mongodb
+    restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin_password
       MONGO_INITDB_DATABASE: practicas
     volumes:
       - mongodb_data:/data/db
-      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/init.js
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/init.js:ro
     ports:
       - "27017:27017"
     healthcheck:
@@ -42,36 +47,35 @@ services:
     networks:
       - practicas-network
 
-  # Redis - Cache & Session Store
   redis:
     image: redis:7-alpine
     container_name: practicas-redis
+    restart: unless-stopped
     command: redis-server --appendonly yes --requirepass redis_password
     volumes:
       - redis_data:/data
     ports:
       - "6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "redis_password", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
       - practicas-network
 
-  # RabbitMQ - Message Broker
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
     container_name: practicas-rabbitmq
+    restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
-      RABBITMQ_DEFAULT_VHOST: /
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     ports:
-      - "5672:5672"      # AMQP
-      - "15672:15672"    # Management UI
+      - "5672:5672"
+      - "15672:15672"
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 10s
@@ -80,60 +84,49 @@ services:
     networks:
       - practicas-network
 
-  # Kafka - Event Streaming
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: practicas-zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+    ports:
+      - "2181:2181"
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - practicas-network
+
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     container_name: practicas-kafka
+    restart: unless-stopped
     depends_on:
       zookeeper:
         condition: service_healthy
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-      KAFKA_LOG_RETENTION_HOURS: 168
     volumes:
       - kafka_data:/var/lib/kafka/data
     ports:
       - "9092:9092"
-    healthcheck:
-      test: ["CMD", "kafka-broker-api-versions.sh", "--bootstrap-server", "localhost:9092"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - practicas-network
 
-  # Zookeeper - Kafka Coordinator
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    container_name: practicas-zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    volumes:
-      - zookeeper_data:/var/lib/zookeeper/data
-    ports:
-      - "2181:2181"
-    healthcheck:
-      test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - practicas-network
-
-  # MailHog - Local Email Testing
   mailhog:
     image: mailhog/mailhog:latest
     container_name: practicas-mailhog
     ports:
-      - "1025:1025"      # SMTP
-      - "8025:8025"      # Web UI
+      - "1025:1025"
+      - "8025:8025"
     networks:
       - practicas-network
 
@@ -141,10 +134,10 @@ services:
   # MICROSERVICES
   # ============================================
 
-  # Auth Service
   auth-service:
     image: practicas-auth-service:latest
     container_name: practicas-auth-service
+    restart: unless-stopped
     environment:
       NODE_ENV: development
       PORT: 3001
@@ -154,11 +147,9 @@ services:
       DB_USERNAME: practicas_user
       DB_PASSWORD: practicas_password
       DB_NAME: practicas_db
-      DB_SYNCHRONIZE: 'true'
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: redis_password
-      JWT_EXPIRATION: 3600
     ports:
       - "3001:3001"
     depends_on:
@@ -168,22 +159,20 @@ services:
         condition: service_healthy
     networks:
       - practicas-network
-    restart: unless-stopped
 
-  # User Management Service
   user-management-service:
     image: practicas-user-management-service:latest
     container_name: practicas-user-management-service
+    restart: unless-stopped
     environment:
       NODE_ENV: development
       PORT: 3002
       JWT_SECRET: dev-shared-jwt-secret
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: practicas_user
+      DB_USERNAME: practicas_user
       DB_PASSWORD: practicas_password
       DB_NAME: practicas_db
-      DB_SYNCHRONIZE: 'true'
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: redis_password
@@ -196,46 +185,18 @@ services:
         condition: service_healthy
     networks:
       - practicas-network
-    restart: unless-stopped
 
-  # API Gateway
-  api-gateway:
-    image: practicas-api-gateway:latest
-    container_name: practicas-api-gateway
-    environment:
-      NODE_ENV: development
-      PORT: 4000
-      JWT_SECRET: dev-shared-jwt-secret
-      AUTH_SERVICE_URL: http://auth-service:3001
-      USER_MANAGEMENT_SERVICE_URL: http://user-management-service:3002
-      USERS_SERVICE_URL: http://user-management-service:3002
-      REGISTRATION_SERVICE_URL: http://registration-service:3003
-      COMMUNICATION_SERVICE_URL: http://communication-service:3004
-      TRACKING_SERVICE_URL: http://tracking-service:3005
-      NOTIFICATION_SERVICE_URL: http://notification-service:3006
-      DOCUMENT_SERVICE_URL: http://document-management-service:3007
-      REPORTING_SERVICE_URL: http://reporting-service:3008
-    ports:
-      - "4000:4000"
-    depends_on:
-      - auth-service
-      - user-management-service
-      - registration-service
-    networks:
-      - practicas-network
-    restart: unless-stopped
-
-  # Registration Service
   registration-service:
     image: practicas-registration-service:latest
     container_name: practicas-registration-service
+    restart: unless-stopped
     environment:
       NODE_ENV: development
       PORT: 3003
       JWT_SECRET: dev-shared-jwt-secret
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: practicas_user
+      DB_USERNAME: practicas_user
       DB_PASSWORD: practicas_password
       DB_NAME: practicas_db
       REDIS_HOST: redis
@@ -250,22 +211,20 @@ services:
         condition: service_healthy
     networks:
       - practicas-network
-    restart: unless-stopped
 
-  # Tracking Service
   tracking-service:
     image: practicas-tracking-service:latest
     container_name: practicas-tracking-service
+    restart: unless-stopped
     environment:
       NODE_ENV: development
       PORT: 3005
       JWT_SECRET: dev-shared-jwt-secret
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: practicas_user
+      DB_USERNAME: practicas_user
       DB_PASSWORD: practicas_password
       DB_NAME: practicas_db
-      DB_SYNCHRONIZE: 'true'
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: redis_password
@@ -278,22 +237,20 @@ services:
         condition: service_healthy
     networks:
       - practicas-network
-    restart: unless-stopped
 
-      # Document Management Service
   document-management-service:
     image: practicas-document-management-service:latest
     container_name: practicas-document-management-service
+    restart: unless-stopped
     environment:
       NODE_ENV: development
       PORT: 3007
       JWT_SECRET: dev-shared-jwt-secret
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: practicas_user
+      DB_USERNAME: practicas_user
       DB_PASSWORD: practicas_password
       DB_NAME: practicas_db
-      DB_SYNCHRONIZE: 'true'
       MONGO_HOST: mongodb
       MONGO_PORT: 27017
       MONGO_USER: admin
@@ -313,14 +270,35 @@ services:
         condition: service_healthy
     networks:
       - practicas-network
-    restart: unless-stopped
 
-  # Web Frontend (Next.js)
+  api-gateway:
+    image: practicas-api-gateway:latest
+    container_name: practicas-api-gateway
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      JWT_SECRET: dev-shared-jwt-secret
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_MANAGEMENT_SERVICE_URL: http://user-management-service:3002
+      REGISTRATION_SERVICE_URL: http://registration-service:3003
+      TRACKING_SERVICE_URL: http://tracking-service:3005
+      DOCUMENT_SERVICE_URL: http://document-management-service:3007
+    ports:
+      - "4000:4000"
+    depends_on:
+      - auth-service
+      - user-management-service
+      - registration-service
+    networks:
+      - practicas-network
+
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
     container_name: practicas-web
+    restart: unless-stopped
     environment:
       NEXT_PUBLIC_API_BASE_URL: http://api-gateway:4000
       NODE_ENV: production
@@ -330,7 +308,10 @@ services:
       - api-gateway
     networks:
       - practicas-network
-    restart: unless-stopped
+
+# ============================================
+# VOLUMES & NETWORK
+# ============================================
 
 volumes:
   postgres_data:
@@ -339,9 +320,6 @@ volumes:
   rabbitmq_data:
   kafka_data:
   zookeeper_data:
-  mosquitto_data:
-  prometheus_data:
-  grafana_data:
 
 networks:
   practicas-network:
