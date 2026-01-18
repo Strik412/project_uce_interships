@@ -239,10 +239,22 @@ export class HourLogsService {
 
     const completedHours = parseFloat(result?.total || '0');
 
+    // Get placement to check if hours are complete
+    const placement = await this.placementRepository.findOne({
+      where: { id: placementId },
+    });
+
     await this.placementRepository.update(
       { id: placementId },
       { completedHours }
     );
+
+    // Check if hours meet or exceed expected hours - ready for certificate request
+    if (placement && completedHours >= placement.expectedHours) {
+      // Optionally notify student that they can request certificate
+      // For now, just log it
+      console.log(`Placement ${placementId} has completed all required hours. Student can request certificate.`);
+    }
   }
 
   async getStatsByPlacement(placementId: string, userId: string, userRole: string): Promise<any> {
