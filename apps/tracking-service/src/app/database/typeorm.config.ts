@@ -6,12 +6,12 @@ import { Milestone } from '../milestones/domain/milestone.entity';
 export const trackingDatabaseConfig: TypeOrmModuleOptions = {
   type: 'postgres',
   host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
+  port: parseInt(process.env.DB_PORT || '5432', 10),
   username: process.env.DB_USERNAME || 'practicas_user',
   password: process.env.DB_PASSWORD || 'practicas_password',
   database: process.env.DB_NAME || 'practicas_db',
   entities: [PracticeAssignment, ProgressReport, Milestone],
-  synchronize: process.env.NODE_ENV !== 'production',
+  synchronize: false,
   logging: process.env.NODE_ENV !== 'production',
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   extra: {
@@ -22,9 +22,3 @@ export const trackingDatabaseConfig: TypeOrmModuleOptions = {
   cache: false,
 };
 
-export const trackingMigrationsConfig: TypeOrmModuleOptions = {
-  ...trackingDatabaseConfig,
-  migrations: ['dist/apps/tracking-service/src/migrations/**/*.js'],
-  migrationsTableName: 'tracking_migrations',
-  migrationsRun: false,
-};
