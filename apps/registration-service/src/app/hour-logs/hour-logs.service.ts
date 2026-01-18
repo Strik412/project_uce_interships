@@ -18,13 +18,14 @@ export class HourLogsService {
     // Verify the placement belongs to the student
     const placement = await this.placementRepository.findOne({
       where: { id: dto.placementId },
+      relations: ['student'],
     });
 
     if (!placement) {
       throw new NotFoundException('Placement not found');
     }
 
-    if (placement.studentId !== studentId) {
+    if (placement.student.id !== studentId) {
       throw new ForbiddenException('You can only log hours for your own placement');
     }
 
@@ -67,7 +68,7 @@ export class HourLogsService {
 
     // Company users see logs where they are supervisor OR own the practice
     if (userRole === 'company') {
-      query.andWhere('(placement.companySupervisorId = :userId OR practice.userId = :userId)', { userId });
+      query.andWhere('(placement.companySupervisorId = :userId OR practice.user_id = :userId)', { userId });
     }
 
     // Coordinators and admins see all logs (no additional filter)
@@ -94,7 +95,7 @@ export class HourLogsService {
       throw new ForbiddenException('You can only view hour logs for your assigned placements');
     }
 
-    if (userRole === 'company' && log.placement?.companySupervisorId !== userId && log.placement?.practice?.userId !== userId) {
+    if (userRole === 'company' && log.placement?.companySupervisorId !== userId && log.placement?.practice?.user?.id !== userId) {
       throw new ForbiddenException('You can only view hour logs for your assigned placements');
     }
 
@@ -130,7 +131,7 @@ export class HourLogsService {
   ): Promise<HourLogEntity> {
     const log = await this.hourLogRepository.findOne({
       where: { id },
-      relations: ['placement', 'placement.practice'],
+      relations: ['placement', 'placement.practice', 'placement.practice.user'],
     });
 
     if (!log) {
@@ -145,7 +146,7 @@ export class HourLogsService {
       isTeacher = true;
     } else if (
       userRole === 'company' &&
-      (log.placement?.companySupervisorId === reviewerId || log.placement?.practice?.userId === reviewerId)
+      (log.placement?.companySupervisorId === reviewerId || log.placement?.practice?.user?.id === reviewerId)
     ) {
       isCompany = true;
     } else if (!['coordinator', 'admin'].includes(userRole)) {
@@ -248,13 +249,14 @@ export class HourLogsService {
     // Verify access
     const placement = await this.placementRepository.findOne({
       where: { id: placementId },
+      relations: ['student', 'practice'],
     });
 
     if (!placement) {
       throw new NotFoundException('Placement not found');
     }
 
-    if (userRole === 'student' && placement.studentId !== userId) {
+    if (userRole === 'student' && placement.student && placement.student.id !== userId) {
       throw new ForbiddenException('Access denied');
     }
 
