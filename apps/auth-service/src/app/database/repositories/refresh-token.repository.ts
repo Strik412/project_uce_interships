@@ -1,25 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
+import { Repository, LessThan, MoreThan } from 'typeorm';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
+import { UserEntity } from '../entities/user.entity';
 
 @Injectable()
 export class RefreshTokenRepository {
   constructor(
     @InjectRepository(RefreshTokenEntity)
-    private repository: Repository<RefreshTokenEntity>,
+    private readonly repository: Repository<RefreshTokenEntity>,
   ) {}
 
   /**
    * Crear un nuevo refresh token
    */
-  async create(userId: string, token: string, expiresAt: Date): Promise<RefreshTokenEntity> {
+  async create(
+    user: UserEntity,
+    token: string,
+    expiresAt: Date,
+  ): Promise<RefreshTokenEntity> {
     const refreshToken = this.repository.create({
-      userId,
+      user,
       token,
       expiresAt,
       isRevoked: false,
     });
+
     return this.repository.save(refreshToken);
   }
 
@@ -28,7 +34,10 @@ export class RefreshTokenRepository {
    */
   async findByToken(token: string): Promise<RefreshTokenEntity | null> {
     return this.repository.findOne({
-      where: { token, isRevoked: false },
+      where: {
+        token,
+        isRevoked: false,
+      },
       relations: ['user'],
     });
   }
@@ -39,7 +48,7 @@ export class RefreshTokenRepository {
   async findValidTokensByUserId(userId: string): Promise<RefreshTokenEntity[]> {
     return this.repository.find({
       where: {
-        userId,
+        user: { id: userId },
         isRevoked: false,
         expiresAt: MoreThan(new Date()),
       },
@@ -61,7 +70,10 @@ export class RefreshTokenRepository {
    */
   async revokeAllUserTokens(userId: string): Promise<void> {
     await this.repository.update(
-      { userId, isRevoked: false },
+      {
+        user: { id: userId },
+        isRevoked: false,
+      },
       { isRevoked: true },
     );
   }
@@ -73,7 +85,7 @@ export class RefreshTokenRepository {
     const result = await this.repository.delete({
       expiresAt: LessThan(new Date()),
     });
-    return result.affected || 0;
+    return result.affected ?? 0;
   }
 
   /**
@@ -87,8 +99,7 @@ export class RefreshTokenRepository {
         expiresAt: MoreThan(new Date()),
       },
     });
+
     return !!refreshToken;
   }
 }
-
-import { MoreThan } from 'typeorm';
