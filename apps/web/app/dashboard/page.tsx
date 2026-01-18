@@ -457,7 +457,7 @@ export default function DashboardPage() {
                     <strong>Placement</strong>
                     <span className="badge">{pl.assignmentStatus || 'pending'}</span>
                   </div>
-                  <p className="small" style={{ margin: '4px 0' }}>Estudiante: {getUserLabel(pl.studentId)} • Práctica: {getPracticeName(pl.practiceId)}</p>
+                  <p className="small" style={{ margin: '4px 0' }}>Estudiante: {getUserLabel(pl.studentId || pl.student?.id || '')} • Práctica: {getPracticeName(pl.practiceId || pl.practice?.id || '')}</p>
                   {professorsError && <p className="small" style={{ color: '#ff8a8a', margin: '4px 0' }}>{professorsError}</p>}
                   <div style={{ width: '100%', display: 'flex', gap: 8, alignItems: 'center' }}>
                     <select
@@ -500,8 +500,8 @@ export default function DashboardPage() {
               {(placements || []).filter(pl => pl.assignmentStatus === 'invited').map(pl => (
                 <div key={pl.id} className="pill" style={{ width: '100%', justifyContent: 'space-between' }}>
                   <div>
-                    <strong>Estudiante: {getUserLabel(pl.studentId)}</strong>
-                    <span className="small" style={{ marginLeft: 8 }}>Práctica: {getPracticeName(pl.practiceId)}</span>
+                    <strong>Estudiante: {getUserLabel(pl.studentId || pl.student?.id || '')}</strong>
+                    <span className="small" style={{ marginLeft: 8 }}>Práctica: {getPracticeName(pl.practiceId || pl.practice?.id || '')}</span>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button type="button" onClick={() => handleRespondAssignment(pl.id, 'accept')} disabled={loading}>Aceptar</button>
