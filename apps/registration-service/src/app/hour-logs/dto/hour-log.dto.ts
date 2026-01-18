@@ -27,7 +27,7 @@ export class CreateHourLogDto {
 
 export class ReviewHourLogDto {
   @IsEnum(HourLogStatus)
-  status!: HourLogStatus;
+  status!: typeof HourLogStatus[keyof typeof HourLogStatus];
 
   @IsString()
   @IsOptional()
