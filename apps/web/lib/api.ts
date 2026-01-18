@@ -121,8 +121,12 @@ export interface HourLogStats {
 
 export interface Placement {
   id: string;
-  studentId: string;
-  practiceId: string;
+  studentId?: string;
+  student?: { id: string };
+  practiceId?: string;
+  practice?: { id: string; companyName?: string };
+  applicationId?: string;
+  application?: { id: string };
   professorId?: string;
   assignmentStatus?: 'pending' | 'invited' | 'accepted' | 'declined';
   supervisorAssignedAt?: string;
