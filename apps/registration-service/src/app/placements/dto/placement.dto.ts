@@ -60,7 +60,7 @@ export class UpdatePlacementDto {
 
   @IsEnum(PlacementStatus)
   @IsOptional()
-  status?: PlacementStatus;
+  status?: typeof PlacementStatus[keyof typeof PlacementStatus];
 
   @IsString()
   @IsOptional()
