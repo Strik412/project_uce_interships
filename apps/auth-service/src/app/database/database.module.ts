@@ -16,10 +16,8 @@ import { PasswordResetTokenEntity } from './entities/password-reset-token.entity
         password: configService.get('DB_PASSWORD', 'practicas_password'),
         database: configService.get('DB_NAME', 'practicas_db'),
         entities: [UserEntity, RefreshTokenEntity, PasswordResetTokenEntity],
-        // Allow override via DB_SYNCHRONIZE env; default off in production
-        synchronize:
-          configService.get('DB_SYNCHRONIZE',
-            configService.get('NODE_ENV') !== 'production' ? 'true' : 'false') === 'true',
+        // Schema is managed via migrations only - never auto-sync
+        synchronize: false,
         logging: configService.get('DB_LOGGING', false),
         dropSchema: false,
         ssl: configService.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
