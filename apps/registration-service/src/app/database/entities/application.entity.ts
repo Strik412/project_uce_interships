@@ -8,37 +8,30 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { PracticeEntity } from './practice.entity';
+import { UserEntity } from './user.entity';
 
 @Entity('applications')
 export class ApplicationEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'uuid' })
-  practiceId!: string;
-
-  @ManyToOne(() => PracticeEntity)
-  @JoinColumn({ name: 'practiceId' })
+  @ManyToOne(() => PracticeEntity, { nullable: false })
+  @JoinColumn({ name: 'practice_id' })
   practice!: PracticeEntity;
 
-  @Column({ type: 'uuid' })
-  userId!: string;
+  @ManyToOne(() => UserEntity, { nullable: false })
+  @JoinColumn({ name: 'user_id' })
+  user!: UserEntity;
 
-  @Column({ type: 'text', nullable: true })
-  motivation?: string;
-
-  @Column({ type: 'varchar', nullable: true })
-  resume?: string;
-
-  @Column({ type: 'varchar', default: 'pending' })
+  @Column({ type: 'varchar', length: 50, default: 'pending' })
   status!: string;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'text', nullable: true, name: 'rejection_reason' })
   rejectionReason?: string;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
 }
