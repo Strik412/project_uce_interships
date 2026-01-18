@@ -105,12 +105,36 @@ locals {
       port = 4000
       path = "/health"
     }
-    auth = {
-      port = 4001
+    auth-service = {
+      port = 3001
       path = "/health"
     }
-    products = {
-      port = 4002
+    user-management = {
+      port = 3002
+      path = "/health"
+    }
+    registration-service = {
+      port = 3003
+      path = "/health"
+    }
+    communication-service = {
+      port = 3004
+      path = "/health"
+    }
+    notification-service = {
+      port = 3005
+      path = "/health"
+    }
+    document-management-service = {
+      port = 3006
+      path = "/health"
+    }
+    reporting-service = {
+      port = 3007
+      path = "/health"
+    }
+    tracking-service = {
+      port = 3008
       path = "/health"
     }
   }
@@ -159,8 +183,19 @@ output "alb_dns_name" {
   value = aws_lb.alb.dns_name
 }
 
+output "rds_endpoint" {
+  value       = aws_db_instance.postgres.endpoint
+  description = "RDS PostgreSQL endpoint (host:port)"
+}
+
+output "redis_endpoint" {
+  value       = aws_elasticache_cluster.redis.cache_nodes[0].address
+  description = "ElastiCache Redis endpoint"
+}
+
 output "target_group_arns" {
   value = {
     for k, v in aws_lb_target_group.services : k => v.arn
   }
+  description = "Target group ARNs for all services"
 }
