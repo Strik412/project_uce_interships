@@ -31,7 +31,8 @@ export class UsersService {
     const professors = await this.usersRepository
       .createQueryBuilder('u')
       .select(['u.id', 'u.email', 'u.firstName', 'u.lastName'])
-      .where("'professor' = ANY(u.roles)")
+      // Support single-value roles stored as text by normalizing to an array at query time
+      .where(":role = ANY(string_to_array(u.roles, ','))", { role: 'professor' })
       .andWhere('u.isActive = true')
       .orderBy('u.lastName', 'ASC')
       .getMany();
@@ -47,7 +48,8 @@ export class UsersService {
     const students = await this.usersRepository
       .createQueryBuilder('u')
       .select(['u.id', 'u.email', 'u.firstName', 'u.lastName'])
-      .where("'student' = ANY(u.roles)")
+      // Support single-value roles stored as text by normalizing to an array at query time
+      .where(":role = ANY(string_to_array(u.roles, ','))", { role: 'student' })
       .andWhere('u.isActive = true')
       .orderBy('u.lastName', 'ASC')
       .getMany();
@@ -74,8 +76,8 @@ export class UsersService {
     }
 
     if (role) {
-      // Match enum value within roles array
-      qb.andWhere(':role = ANY(u.roles)', { role });
+      // Normalize roles column (text) into an array at query time to match values
+      qb.andWhere(":role = ANY(string_to_array(u.roles, ','))", { role });
     }
 
     if (search) {
@@ -136,7 +138,7 @@ export class UsersService {
     qb.where('u.isActive = :active', { active: true });
 
     if (role) {
-      qb.andWhere(':role = ANY(u.roles)', { role });
+      qb.andWhere(":role = ANY(string_to_array(u.roles, ','))", { role });
     }
 
     if (search) {
