@@ -14,9 +14,10 @@ import { PracticeEntity, ApplicationEntity, AssignmentEntity, PlacementEntity, H
         password: configService.get('DB_PASSWORD', 'practicas_password'),
         database: configService.get('DB_NAME', 'practicas_db'),
         entities: [PracticeEntity, ApplicationEntity, AssignmentEntity, PlacementEntity, HourLogEntity],
-        synchronize: configService.get('DB_SYNCHRONIZE') === 'true' || configService.get('NODE_ENV') !== 'production',
+        // Schema is managed via migrations only - never auto-sync
+        synchronize: false,
         logging: configService.get('DB_LOGGING', false),
-        dropSchema: configService.get('NODE_ENV') !== 'production',
+        dropSchema: false,
         ssl: configService.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
       }),
       inject: [ConfigService],
