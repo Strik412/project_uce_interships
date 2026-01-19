@@ -8,7 +8,6 @@ on:
     paths:
       - 'apps/registration-service/**'
       - '.github/workflows/registration-service-deploy.yml'
-
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: practicas-registration-service
