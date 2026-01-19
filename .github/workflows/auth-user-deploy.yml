@@ -50,7 +50,7 @@ jobs:
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          REPO=dapaeza/user-management-service
+          REPO=dapaeza/practicas-user-management-service
           docker build -t $REPO:latest -t $REPO:$IMAGE_TAG -f apps/user-management-service/Dockerfile .
           docker push $REPO:latest
           docker push $REPO:$IMAGE_TAG
