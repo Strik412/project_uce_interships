@@ -33,14 +33,14 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ github.actor }}
+          username: dapaeza
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build, tag, and push api-gateway image
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          REPO=${{ github.actor }}/api-gateway
+          REPO=dapaeza/practicas-api-gateway
           docker build -t $REPO:latest -t $REPO:$IMAGE_TAG -f apps/api-gateway/Dockerfile .
           docker push $REPO:latest
           docker push $REPO:$IMAGE_TAG
