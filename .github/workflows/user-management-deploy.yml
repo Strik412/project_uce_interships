@@ -11,7 +11,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: practicas-user-management
+  ECR_REPOSITORY: practicas-user-management-service
   SERVICE_NAME: user-management-service
   ASG_NAME: practicas-auth_user-asg
 
