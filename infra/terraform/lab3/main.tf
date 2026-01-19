@@ -91,7 +91,6 @@ resource "aws_launch_template" "group" {
       for svc in each.value.services :
         "run_service \"${svc.name}\" \"${svc.port}\" \"${svc.ecr_name}\""
     ])
-    ecr_registry = var.ecr_registry_url
     db_host      = var.database_endpoint
     db_port      = var.database_port
     db_name      = var.database_name
