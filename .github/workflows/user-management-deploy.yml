@@ -8,6 +8,7 @@ on:
     paths:
       - 'apps/user-management-service/**'
       - '.github/workflows/user-management-deploy.yml'
+      
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: practicas-user-management-service

@@ -8,6 +8,7 @@ on:
     paths:
       - 'apps/tracking-service/**'
       - '.github/workflows/tracking-service-deploy.yml'
+      
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: practicas-tracking-service

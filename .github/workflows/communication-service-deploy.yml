@@ -8,6 +8,7 @@ on:
     paths:
       - 'apps/communication-service/**'
       - '.github/workflows/communication-service-deploy.yml'
+      
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: practicas-communication-service
