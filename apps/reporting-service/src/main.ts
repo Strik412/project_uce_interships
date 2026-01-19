@@ -8,8 +8,9 @@ import { AppModule } from './app/app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Add health endpoint BEFORE any routing
-  app.get('/api/v1/health', (req: Request, res: Response) => {
+  // Add health endpoint BEFORE any routing (NestJS + Express)
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.get('/api/v1/health', (req: Request, res: Response) => {
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
