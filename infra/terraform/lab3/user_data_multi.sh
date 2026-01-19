@@ -17,11 +17,7 @@ yum install -y unzip
 unzip -q /tmp/awscliv2.zip -d /tmp
 /tmp/aws/install
 
-# -----------------------------
-# Login to ECR
-# -----------------------------
-aws ecr get-login-password --region ${aws_region} \
-  | docker login --username AWS --password-stdin ${ecr_registry}
+
 
 # -----------------------------
 # Docker network
@@ -36,7 +32,7 @@ run_service() {
   PORT="$2"
   IMAGE_REPO="$3"
 
-  IMAGE="$ecr_registry/$IMAGE_REPO:latest"
+  IMAGE="dapaeza/$IMAGE_REPO:latest"
 
   echo "Starting $NAME on port $PORT"
 

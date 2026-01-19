@@ -1,24 +1,3 @@
-# Make all ECR repos public for pull
-resource "aws_ecr_repository_policy" "public_pull" {
-  for_each   = aws_ecr_repository.repos
-  repository = each.value.name
-
-  policy = jsonencode({
-    Version = "2008-10-17"
-    Statement = [
-      {
-        Sid       = "AllowPull"
-        Effect    = "Allow"
-        Principal = "*"
-        Action    = [
-          "ecr:GetDownloadUrlForLayer",
-          "ecr:BatchGetImage",
-          "ecr:BatchCheckLayerAvailability"
-        ]
-      }
-    ]
-  })
-}
 terraform {
   required_version = ">= 1.6.0"
   required_providers {
@@ -58,7 +37,7 @@ data "aws_ami" "al2" {
 
 locals {
   subnet_ids = var.subnet_ids != null ? var.subnet_ids : data.aws_subnets.selected.ids
-  ecr_repos  = var.ecr_repos
+  # ecr_repos removed
 }
 
 # Security groups
@@ -185,17 +164,6 @@ resource "aws_instance" "bastion" {
   }
 }
 
-# ECR repositories for all services
-resource "aws_ecr_repository" "repos" {
-  for_each             = toset(local.ecr_repos)
-  name                 = "practicas-${each.key}"
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-  tags = {
-    Service = each.key
-  }
-}
 
 # Outputs
 output "vpc_id" {
@@ -233,7 +201,4 @@ output "bastion_public_ip" {
   description = "Public IP for bastion host"
 }
 
-output "ecr_repository_urls" {
-  value       = { for k, v in aws_ecr_repository.repos : k => v.repository_url }
-  description = "ECR repository URLs keyed by service name"
-}
+
