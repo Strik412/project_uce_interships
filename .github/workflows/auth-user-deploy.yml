@@ -7,7 +7,6 @@ on:
       - 'apps/auth-service/**'
       - 'apps/user-management-service/**'
       - '.github/workflows/auth-user-deploy.yml'
-
 env:
   AWS_REGION: us-east-1
   ASG_NAME: practicas-auth_user-asg

@@ -7,7 +7,6 @@ on:
       - 'apps/document-management-service/**'
       - 'apps/reporting-service/**'
       - '.github/workflows/support2-deploy.yml'
-
 env:
   AWS_REGION: us-east-1
   ASG_NAME: practicas-support2-asg
