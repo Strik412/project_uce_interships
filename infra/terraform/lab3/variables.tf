@@ -19,11 +19,6 @@ variable "instance_type" {
   description = "EC2 instance type for services"
 }
 
-variable "ecr_registry_url" {
-  type        = string
-  description = "ECR registry URL (e.g., 123456789.dkr.ecr.us-east-1.amazonaws.com)"
-}
-
 variable "target_group_arns" {
   type        = map(string)
   description = "Target group ARNs keyed by service name"
@@ -31,19 +26,19 @@ variable "target_group_arns" {
 
 variable "asg_min" {
   type        = number
-  default     = 2
+  default     = 1
   description = "Minimum number of instances per service"
 }
 
 variable "asg_max" {
   type        = number
-  default     = 4
+  default     = 1
   description = "Maximum number of instances per service"
 }
 
 variable "asg_desired" {
   type        = number
-  default     = 2
+  default     = 1
   description = "Desired number of instances per service"
 }
 
