@@ -1,0 +1,10 @@
+dist
+node_modules
+.env*
+!.env.example
+.next
+out
+coverage
+.nx/cache
+terraform/.terraform
+*.log

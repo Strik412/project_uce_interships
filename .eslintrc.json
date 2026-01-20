@@ -1,0 +1,63 @@
+{
+  "root": true,
+  "ignorePatterns": ["**/*"],
+  "plugins": ["@nx"],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "extends": [
+        "plugin:@nx/typescript",
+        "prettier"
+      ],
+      "rules": {
+        "@typescript-eslint/explicit-function-return-types": [
+          "warn",
+          {
+            "allowExpressions": true,
+            "allowTypedFunctionExpressions": true
+          }
+        ],
+        "@typescript-eslint/explicit-member-accessibility": [
+          "warn",
+          {
+            "accessibility": "explicit",
+            "overrides": {
+              "constructors": "off"
+            }
+          }
+        ],
+        "@typescript-eslint/naming-convention": [
+          "error",
+          {
+            "selector": "default",
+            "format": ["camelCase"],
+            "leadingUnderscore": "allow",
+            "trailingUnderscore": "allow"
+          },
+          {
+            "selector": "variable",
+            "format": ["camelCase", "UPPER_CASE"],
+            "leadingUnderscore": "allow",
+            "trailingUnderscore": "allow"
+          },
+          {
+            "selector": "typeLike",
+            "format": ["PascalCase"]
+          },
+          {
+            "selector": "enumMember",
+            "format": ["UPPER_CASE"]
+          }
+        ],
+        "no-console": ["warn", { "allow": ["warn", "error"] }]
+      }
+    },
+    {
+      "files": ["*.json"],
+      "extends": ["plugin:@nx/javascript"],
+      "rules": {
+        "@nx/dependency-checks": "error"
+      }
+    }
+  ]
+}

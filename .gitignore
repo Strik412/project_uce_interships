@@ -1,0 +1,68 @@
+# Nx
+.nx/cache/
+
+# Build outputs
+.next/
+dist/
+build/
+*.tsbuildinfo
+
+# Dependencies
+node_modules/
+pnpm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+volumes/
+
+# Test/local scripts
+*.http
+*.log
+test-*.ps1
+temp_*.sql
+check_*.sql
+fix_*.sql
+insert_*.sql
+update_*.sql
+verify_*.sql
+create_test_*.sql
+postman-collection.json
+QUICKSTART.bat
+start-auth-service.js
+backup.sql
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+.terraform.tfstate.lock.info
+
+# Variables sensibles
+*.tfvars
+*.tfvars.json
+
+#Diagramas
+diagramas
+
+#Scripts
+scripts
+
+#data
+data

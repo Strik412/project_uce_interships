@@ -23,12 +23,18 @@ This platform provides a comprehensive solution for managing professional intern
 
 The platform follows a microservices architecture with the following key components:
 
-- **API Gateway**: Centralized entry point with routing, authentication, and rate limiting
-- **9 Specialized Microservices**: Each handling a specific domain
-- **Multiple Databases**: PostgreSQL, MongoDB, and Redis
-- **Message Broker**: RabbitMQ for asynchronous communication
-- **MQTT Broker**: Mosquitto for real-time notifications
-- **Monitoring**: Prometheus & Grafana for observability
+### Core Services (Production Ready)
+- **API Gateway** (Port 4000): Centralized entry point with routing and authentication
+- **Auth Service** (Port 3001): JWT authentication and token management
+- **User Management Service** (Port 3002): User profiles and role management
+- **Registration Service** (Port 3003): Practices, applications, placements, and hour logs
+- **Tracking Service** (Port 3005): Progress reports and milestone tracking (optional)
+
+### Infrastructure
+- **Databases**: PostgreSQL (primary), MongoDB (documents), Redis (caching)
+- **Message Brokers**: RabbitMQ, Kafka, Mosquitto
+- **Monitoring**: Prometheus & Grafana
+- **Email Testing**: MailHog for local email testing
 
 ### Architecture Diagrams
 
@@ -68,9 +74,9 @@ Before running the project, ensure you have:
 
 - **Node.js**: >= 20.0.0
 - **pnpm**: >= 9.0.0
-- **Docker**: >= 20.x
-- **Docker Compose**: >= 2.x
+- **Docker Desktop**: >= 4.x (includes Docker & Docker Compose)
 - **Git**: Latest version
+- **Windows PowerShell** (for Windows) or **Bash** (for Linux/Mac)
 
 ## 🚀 Getting Started
 
@@ -86,17 +92,40 @@ git clone <https://github.com/Strik412/project_uce_interships.git>
 pnpm install
 ```
 
-### 3. Start Infrastructure (Databases & Brokers)
+### 3. Start All Services (Databases, Brokers & Microservices)
 
 ```bash
-# Windows
-.\scripts\start-databases.bat
+# Windows PowerShell
+cd Final_Project
+docker compose up -d
 
 # Linux/Mac
-./scripts/start-databases.sh
-
-# Or using Docker Compose directly
+cd Final_Project
 docker-compose up -d
+```
+
+### 4. Access the Application
+
+- **Frontend**: http://localhost:3000
+- **API Gateway**: http://localhost:4000
+- **Swagger Docs**: http://localhost:4000/api
+- **MailHog (Email Testing)**: http://localhost:8025
+
+### 5. Test the System
+
+**Default Test Credentials:**
+```
+Student:
+  Email: student@example.com
+  Password: password123
+
+Teacher:
+  Email: teacher@example.com
+  Password: password123
+
+Company:
+  Email: company@example.com
+  Password: password123
 ```
 
 ### 4. Start All Microservices
@@ -120,17 +149,31 @@ pnpm dev:gateway     # API Gateway only
 
 ## 🔧 Microservices
 
+### Core Workflow (Registration Service)
+Handles the complete internship workflow:
+- **Practices**: Companies create internship offerings
+- **Applications**: Students apply for practices
+- **Placements**: Approved applications → internship assignments
+- **Hour Logs**: Time tracking with dual approval (teacher + company)
+
+### Optional Features (Tracking Service)
+Enhances monitoring and progress tracking:
+- **Progress Reports**: Weekly progress submissions
+- **Milestones**: Project milestone tracking
+
+See individual README files in each service directory for detailed documentation.
+
 | Service | Port | Description |
 |---------|------|-------------|
-| **API Gateway** | 4000 | Main entry point, routing, auth middleware |
-| **Auth Service** | 3001 | Authentication, JWT tokens, authorization |
-| **User Management** | 3002 | User CRUD, profiles, roles |
-| **Registration Service** | 3003 | Internship registration, applications |
-| **Tracking Service** | 3004 | Internship progress tracking, milestones |
-| **Communication Service** | 3005 | Internal messaging, notifications queue |
-| **Notification Service** | 3006 | Email, SMS, push notifications |
-| **Document Management** | 3007 | File upload, storage, versioning |
-| **Reporting & Analytics** | 3008 | Reports, dashboards, metrics |
+| **API Gateway** | 4000 | Main entry point, routing, authentication |
+| **Auth Service** | 3001 | JWT authentication and token management |
+| **User Management** | 3002 | User profiles and role management |
+| **Registration Service** | 3003 | Practices, applications, placements, hour logs |
+| **Tracking Service** | 3005 | Progress reports and milestones (optional) |
+| **Document Management** | 3007 | `/api/v1` | File upload, storage, versioning |
+| **Reporting & Analytics** | 3008 | `/` | Reports, dashboards, metrics |
+
+**Documentation**: Each service has detailed README in `apps/<service>/README.md`
 
 ### Service Health Checks
 
@@ -138,11 +181,28 @@ pnpm dev:gateway     # API Gateway only
 # API Gateway
 curl http://localhost:4000/api/v1/health
 
-# Individual services
-curl http://localhost:3001/api/v1/health  # Auth
-curl http://localhost:3002/api/v1/health  # Users
-curl http://localhost:3003/health         # Registration
+# Individual services  
+curl http://localhost:3001/api/v1/health    # Auth
+curl http://localhost:3002/api/v1/health    # Users
+curl http://localhost:3003/health           # Registration
+curl http://localhost:3004/health           # Tracking
+curl http://localhost:3005/api/v1/health    # Communication
+curl http://localhost:3006/api/v1/health    # Notifications
+curl http://localhost:3007/api/v1/health    # Document Mgmt
+curl http://localhost:3008/api              # Reporting (Swagger)
 ```
+
+### Swagger Documentation
+
+Each service exposes Swagger/OpenAPI docs:
+- **Auth Service**: http://localhost:3001/api/docs
+- **User Management**: http://localhost:3002/api/docs
+- **Registration**: http://localhost:3003/api
+- **Tracking**: http://localhost:3004/api
+- **Communication**: http://localhost:3005/api/docs
+- **Notifications**: http://localhost:3006/api/docs
+- **Document Mgmt**: http://localhost:3007/api/docs
+- **Reporting & Analytics**: http://localhost:3008/api
 
 ## 🗄️ Infrastructure
 
@@ -201,10 +261,17 @@ Password: guest
 
 ## 📚 Documentation
 
-- **Architecture Diagrams**: `diagramas/arquitectura/`
-- **Database Schemas**: `diagramas/base-de-datos/`
-- **Process Flows**: `diagramas/bpmn/`
-- **Service READMEs**: Each service has its own README in `apps/<service>/README.md`
+- **Architecture Diagrams**: `diagramas/arquitectura/` — C4 Model (Context, Container, Components), routing, dependencies
+- **Database Schemas**: `diagramas/base-de-datos/` — ER diagrams for PostgreSQL, MongoDB, Redis
+- **Process Flows**: `diagramas/bpmn/` — End-to-end workflows
+- **Infrastructure**: `diagramas/infraestructura/` — AWS, networking, deployment
+- **UML Diagrams**: `diagramas/uml/` — Class and sequence diagrams
+- **Service READMEs**: Each service in `apps/<service>/README.md` documents endpoints, configuration, and usage
+- **Testing Guide**: `TESTING_GUIDE.md` — Integration and e2e test instructions
+
+### API Documentation
+
+All microservices expose Swagger/OpenAPI documentation. See **Swagger Documentation** section under [Microservices](#microservices) for URLs.
 
 ### Generate Dependency Graph
 
@@ -262,11 +329,17 @@ Final_Project/
 ## 🛠️ Available Scripts
 
 ```bash
-# Development
+# Development (all services)
 pnpm dev:all              # Start all services
 pnpm dev:auth             # Start auth service only
-pnpm dev:users            # Start users service only
+pnpm dev:users            # Start user mgmt only
 pnpm dev:gateway          # Start API gateway only
+pnpm dev:registration     # Start registration only
+pnpm dev:tracking         # Start tracking only
+pnpm dev:communication    # Start communication only
+pnpm dev:notification     # Start notification only
+pnpm dev:document         # Start document mgmt only
+pnpm dev:reporting        # Start reporting/analytics only
 
 # Production
 pnpm start                # Start with Nx
@@ -288,6 +361,7 @@ pnpm format:check         # Check formatting
 # Nx Utilities
 pnpm graph                # View dependency graph
 pnpm affected:build       # Build only affected projects
+pnpm affected:test        # Test only affected projects
 ```
 
 ## 🌩️ AWS Infrastructure (Terraform)
