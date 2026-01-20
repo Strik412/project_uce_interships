@@ -96,3 +96,16 @@ variable "redis_port" {
   default     = 6379
   description = "ElastiCache Redis port"
 }
+
+# Image tag configuration
+variable "default_image_tag" {
+  type        = string
+  default     = "latest"
+  description = "Default Docker image tag to use when no per-service tag is provided"
+}
+
+variable "service_image_tags" {
+  type        = map(string)
+  default     = {}
+  description = "Optional per-service image tags keyed by service name"
+}

@@ -11,7 +11,6 @@ terraform {
 provider "aws" {
   region = var.aws_region
 }
-
 locals {
   # Per-service configuration. Each entry becomes one ASG (one instance if ASG sizes = 1).
   services = {
@@ -29,7 +28,9 @@ locals {
 
   # Allow selecting a subset of services to enable. If empty, all services are used.
   selected_services = length(var.enabled_services) > 0 ? { for k, v in local.services : k => v if contains(var.enabled_services, k) } : local.services
-} 
+  # Convenience list of keys (used to pick a subnet index)
+  selected_service_keys = keys(local.selected_services)
+}
 
 
 # Get latest Amazon Linux 2 AMI
@@ -48,20 +49,21 @@ data "aws_ami" "amazon_linux_2" {
   }
 }
 
-# Launch Templates for each service group
-resource "aws_launch_template" "group" {
+
+
+# Single EC2 instances (one per service) - create these first, then we can safely scale down/destroy ASGs after validation
+resource "aws_instance" "service" {
   for_each = local.selected_services
 
-  name_prefix   = "practicas-${each.key}-"
-  image_id      = data.aws_ami.amazon_linux_2.id
-  instance_type = var.instance_type
-
-
+  ami                    = data.aws_ami.amazon_linux_2.id
+  instance_type          = var.instance_type
+  subnet_id              = element(var.subnet_ids, index(local.selected_service_keys, each.key) % length(var.subnet_ids))
+  associate_public_ip_address = false
   vpc_security_group_ids = [var.app_security_group_id]
 
-  user_data = base64encode(templatefile("${path.module}/user_data_multi.sh", {
+  user_data = templatefile("${path.module}/user_data_multi.sh", {
     # single service per instance
-    run_services_block   = "run_service \"${each.key}\" \"${each.value.port}\" \"${each.value.ecr_name}\""
+    run_services_block   = "run_service \"${each.key}\" \"${each.value.port}\" \"${var.dockerhub_username}/${each.value.ecr_name}:${lookup(var.service_image_tags, each.key, var.default_image_tag)}\""
     db_host              = var.database_endpoint
     db_port              = var.database_port
     db_name              = var.database_name
@@ -71,14 +73,11 @@ resource "aws_launch_template" "group" {
     redis_port           = var.redis_port
     aws_region           = var.aws_region
     dockerhub_username   = var.dockerhub_username
-  }))
+  })
 
-  tag_specifications {
-    resource_type = "instance"
-    tags = {
-      Name  = "practicas-${each.key}"
-      Group = each.key
-    }
+  tags = {
+    Name  = "practicas-${each.key}"
+    Group = each.key
   }
 
   lifecycle {
@@ -86,44 +85,22 @@ resource "aws_launch_template" "group" {
   }
 }
 
-# Auto Scaling Groups for each service group
-resource "aws_autoscaling_group" "group" {
+# Register each instance with its service target group
+resource "aws_lb_target_group_attachment" "service" {
   for_each = local.selected_services
 
-  name                = "practicas-${each.key}-asg"
-  vpc_zone_identifier = var.subnet_ids
-  # Attach the single target group for this service
-  target_group_arns   = [ var.target_group_arns[each.key] ]
-  health_check_type         = "ELB"
-  health_check_grace_period = 300
-  min_size                  = var.asg_min
-  max_size                  = var.asg_max
-  desired_capacity          = var.asg_desired
-
-  launch_template {
-    id      = aws_launch_template.group[each.key].id
-    version = "$Latest"
-  }
-
-  tag {
-    key                 = "Name"
-    value               = "practicas-${each.key}"
-    propagate_at_launch = true
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-  depends_on = [aws_launch_template.group]
+  target_group_arn = var.target_group_arns[each.key]
+  target_id        = aws_instance.service[each.key].id
+  port             = each.value.port
 }
 
 # Outputs
-output "asg_names" {
-  value       = { for k, v in aws_autoscaling_group.group : k => v.name }
-  description = "Auto Scaling Group names for each service group"
+output "instance_ids" {
+  value       = { for k, v in aws_instance.service : k => v.id }
+  description = "EC2 instance IDs for each service"
 }
 
-output "launch_template_ids" {
-  value       = { for k, v in aws_launch_template.group : k => v.id }
-  description = "Launch Template IDs for each service group"
+output "instance_private_ips" {
+  value       = { for k, v in aws_instance.service : k => v.private_ip }
+  description = "Private IPs of EC2 instances for each service"
 }

@@ -30,11 +30,9 @@ docker network create practicas_net || true
 run_service() {
   NAME="$1"
   PORT="$2"
-  IMAGE_REPO="$3"
+  IMAGE="$3"
 
-  IMAGE="${dockerhub_username}/$IMAGE_REPO:latest"
-
-  echo "Starting $NAME on port $PORT"
+  echo "Starting $NAME on port $PORT using image $IMAGE"
 
   docker pull "$IMAGE"
 
