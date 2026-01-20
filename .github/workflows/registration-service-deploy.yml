@@ -9,6 +9,7 @@ on:
       - 'apps/registration-service/**'
       - '.github/workflows/registration-service-deploy.yml'
       
+
 env:
   AWS_REGION: us-east-1
   SERVICE_NAME: registration-service

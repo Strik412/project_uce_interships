@@ -9,6 +9,7 @@ on:
       - 'apps/notification-service/**'
       - '.github/workflows/notification-service-deploy.yml'
       
+
 env:
   AWS_REGION: us-east-1
   SERVICE_NAME: notification-service

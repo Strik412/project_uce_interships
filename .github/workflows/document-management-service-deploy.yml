@@ -8,6 +8,7 @@ on:
     paths:
       - 'apps/document-management-service/**'
       - '.github/workflows/document-management-service-deploy.yml'
+
       
 env:
   AWS_REGION: us-east-1
