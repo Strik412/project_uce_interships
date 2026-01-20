@@ -11,7 +11,12 @@ on:
 env:
   AWS_REGION: us-east-1
   SERVICE_NAME: auth-service
-  ASG_NAME: practicas-auth_user-asg
+  ASG_NAME: practicas-auth-service-asg
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+
+concurrency:
+  group: deploy-${{ github.workflow }}
+  cancel-in-progress: true
 
 jobs:
   build-and-push:
@@ -35,20 +40,20 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ github.actor }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build, tag, and push image to Docker Hub
+      - name: Build, tag, and push image
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          REPO=${{ github.actor }}/auth-service
-          docker build -t $REPO:latest -t $REPO:$IMAGE_TAG -f apps/$SERVICE_NAME/Dockerfile .
+          REPO=${{ secrets.DOCKERHUB_USERNAME }}/practicas-auth-service
+          docker build -t $REPO:latest -t $REPO:$IMAGE_TAG -f apps/${{ env.SERVICE_NAME }}/Dockerfile .
           docker push $REPO:latest
           docker push $REPO:$IMAGE_TAG
 
       - name: Start ASG Instance Refresh
         run: |
           aws autoscaling start-instance-refresh \
-            --auto-scaling-group-name $ASG_NAME \
+            --auto-scaling-group-name ${{ env.ASG_NAME }} \
             --preferences '{"MinHealthyPercentage": 50, "InstanceWarmup": 300}'
