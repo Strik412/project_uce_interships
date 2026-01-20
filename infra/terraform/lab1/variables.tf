@@ -26,19 +26,3 @@ variable "your_ip_cidr" {
   type        = string
 }
 
-variable "ecr_repos" {
-  description = "List of service repo names"
-  type        = list(string)
-  default = [
-    "auth-service",
-    "registration-service",
-    "user-management-service",
-    "api-gateway",
-    "web",
-    "communication-service",
-    "notification-service",
-    "document-management-service",
-    "reporting-service",
-    "tracking-service"
-  ]
-}

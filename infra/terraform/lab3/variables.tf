@@ -42,6 +42,20 @@ variable "asg_desired" {
   description = "Desired number of instances per service"
 }
 
+# Optional: select which services to enable; empty list = all services
+variable "enabled_services" {
+  type        = list(string)
+  default     = []
+  description = "List of service keys to create ASGs for; empty = all services"
+}
+
+# Docker Hub username to pull images from
+variable "dockerhub_username" {
+  type        = string
+  default     = "dapaeza"
+  description = "Docker Hub username used by instances to pull images"
+}
+
 # Database variables
 variable "database_endpoint" {
   type        = string

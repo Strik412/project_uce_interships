@@ -153,7 +153,7 @@ resource "aws_security_group" "redis" {
 # Bastion host (for SSH and troubleshooting)
 resource "aws_instance" "bastion" {
   ami                         = data.aws_ami.al2.id
-  instance_type               = "t3.micro"
+  instance_type               = "t2.micro"
   subnet_id                   = local.subnet_ids[0]
   vpc_security_group_ids      = [aws_security_group.bastion.id]
   associate_public_ip_address = true
