@@ -32,7 +32,7 @@ run_service() {
   PORT="$2"
   IMAGE_REPO="$3"
 
-  IMAGE="dapaeza/$IMAGE_REPO:latest"
+  IMAGE="${dockerhub_username}/$IMAGE_REPO:latest"
 
   echo "Starting $NAME on port $PORT"
 
