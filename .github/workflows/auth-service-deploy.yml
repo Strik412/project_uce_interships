@@ -8,6 +8,7 @@ on:
     paths:
       - 'apps/auth-service/**'
       - '.github/workflows/auth-service-deploy.yml'
+      
 env:
   AWS_REGION: us-east-1
   SERVICE_NAME: auth-service

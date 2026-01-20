@@ -9,6 +9,7 @@ on:
       - 'apps/tracking-service/**'
       - '.github/workflows/tracking-service-deploy.yml'
       
+      
 env:
   AWS_REGION: us-east-1
   SERVICE_NAME: tracking-service
