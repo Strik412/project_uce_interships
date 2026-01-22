@@ -13,7 +13,9 @@ export const trackingDatabaseConfig: TypeOrmModuleOptions = {
   entities: [PracticeAssignment, ProgressReport, Milestone],
   synchronize: false,
   logging: process.env.NODE_ENV !== 'production',
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    ssl: {
+    rejectUnauthorized: false,
+  },
   extra: {
     max: 20,
     idleTimeoutMillis: 30000,

@@ -20,7 +20,9 @@ import { PasswordResetTokenEntity } from './entities/password-reset-token.entity
         synchronize: false,
         logging: configService.get('DB_LOGGING', false),
         dropSchema: false,
-        ssl: configService.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
+        ssl:{
+         rejectUnauthorized: false,
+        },
       }),
       inject: [ConfigService],
     }),
