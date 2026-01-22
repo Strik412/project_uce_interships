@@ -106,20 +106,28 @@ resource "aws_instance" "app" {
 resource "aws_eip" "app" {
   for_each = aws_instance.app
   instance = each.value.id
-  vpc      = true
+  domain   = "vpc"
 }
 
 # -----------------------------
 # TARGET GROUP ATTACHMENTS
 # -----------------------------
 resource "aws_lb_target_group_attachment" "services" {
+
   for_each = {
-    for inst_key, inst in local.instances :
-    for svc_key, svc in inst.services :
-    "${inst_key}-${svc_key}" => {
-      instance_key = inst_key
-      service_key  = svc_key
-      port         = svc.port
+    for pair in flatten([
+      for inst_key, inst in local.instances : [
+        for svc_key, svc in inst.services : {
+          key          = "${inst_key}-${svc_key}"
+          instance_key = inst_key
+          service_key  = svc_key
+          port         = svc.port
+        }
+      ]
+    ]) : pair.key => {
+      instance_key = pair.instance_key
+      service_key  = pair.service_key
+      port         = pair.port
     }
   }
 
@@ -134,7 +142,7 @@ resource "aws_lb_target_group_attachment" "services" {
 output "instance_ids" {
   description = "EC2 instance IDs per logical instance"
   value = {
-    for k, inst in aws_instance.service :
+    for k, inst in aws_instance.app :
     k => inst.id
   }
 }
@@ -142,7 +150,7 @@ output "instance_ids" {
 output "instance_private_ips" {
   description = "Private IPs per instance"
   value = {
-    for k, inst in aws_instance.service :
+    for k, inst in aws_instance.app :
     k => inst.private_ip
   }
 }
@@ -150,7 +158,7 @@ output "instance_private_ips" {
 output "instance_public_ips" {
   description = "Elastic public IPs per instance"
   value = {
-    for k, eip in aws_eip.service_eip :
+    for k, eip in aws_eip.app :
     k => eip.public_ip
   }
 }
