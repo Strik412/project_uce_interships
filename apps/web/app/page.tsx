@@ -20,30 +20,30 @@ export default function LandingPage() {
       <div className="card" style={{ marginBottom: 22 }}>
         <div className="section-title" style={{ alignItems: 'flex-start' }}>
           <div style={{ display: 'grid', gap: 8 }}>
-            <span className="badge">Portal de Practicas</span>
-            <h1 style={{ margin: 0 }}>Centraliza registro, seguimiento y certificacion</h1>
+            <span className="badge">Internship Portal</span>
+            <h1 style={{ margin: 0 }}>Centralize registration, tracking, and certification</h1>
             <p style={{ maxWidth: 640 }}>
-              Gestiona cuentas de estudiantes, empresas y profesores desde un solo lugar. Las acciones del tablero viven ahora en
-              /dashboard, y esta pagina es tu punto de entrada siempre visible.
+              Manage student, company, and professor accounts from a single place. Dashboard actions now live in
+              /dashboard, and this page is your always-visible entry point.
             </p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <Link className="button" href="/login">Ingresar</Link>
-              <Link className="button ghost" href="/register">Crear cuenta</Link>
+              <Link className="button" href="/login">Sign In</Link>
+              <Link className="button ghost" href="/register">Create Account</Link>
             </div>
             {hasSession && (
               <div className="pill" style={{ width: 'fit-content' }}>
-                Sesion detectada ({roles[0] ?? 'rol pendiente'}). Ir al <Link className="link" href="/dashboard" style={{ marginLeft: 6 }}>dashboard</Link>.
+                Session detected ({roles[0] ?? 'pending role'}). Go to <Link className="link" href="/dashboard" style={{ marginLeft: 6 }}>dashboard</Link>.
               </div>
             )}
           </div>
           <div className="card" style={{ maxWidth: 360, marginTop: 6 }}>
-            <h3>Flujo rapido</h3>
+            <h3>Quick Flow</h3>
             <ol className="small" style={{ paddingLeft: 18, margin: '8px 0 0', display: 'grid', gap: 6 }}>
-              <li>Elige Ingresar o Crear cuenta.</li>
-              <li>Tras login te enviamos directo al dashboard.</li>
-              <li>Tras registro te redirigimos al login para validar.</li>
+              <li>Choose Sign In or Create Account.</li>
+              <li>After login, you are sent directly to the dashboard.</li>
+              <li>After registration, you are redirected to login for validation.</li>
             </ol>
-            <p className="small" style={{ marginTop: 10 }}>Necesitas ver roles? Usa la tarjeta superior con el token decodificado.</p>
+            <p className="small" style={{ marginTop: 10 }}>Need to see roles? Use the top card with the decoded token.</p>
           </div>
         </div>
       </div>
@@ -51,10 +51,10 @@ export default function LandingPage() {
       <div className="card-grid">
         <div className="card">
           <div className="section-title">
-            <h3>Para estudiantes</h3>
-            <span className="badge">Postula y registra</span>
+            <h3>For Students</h3>
+            <span className="badge">Apply and Register</span>
           </div>
-          <p className="small">Aplica a vacantes, carga tus horas semanales y sigue tu avance desde el dashboard.</p>
+          <p className="small">Apply to openings, log your weekly hours, and track your progress from the dashboard.</p>
         </div>
         <div className="card">
           <div className="section-title">

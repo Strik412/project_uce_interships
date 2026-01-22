@@ -38,13 +38,13 @@ export default function ProfilePage() {
   useEffect(() => {
     const stored = loadToken();
     if (!stored) {
-      setStatus('Necesitas iniciar sesión para ver tu perfil.');
+      setStatus('You need to sign in to view your profile.');
       router.push('/login');
       return;
     }
     if (isTokenExpired(stored)) {
       clearToken();
-      setStatus('La sesión expiró. Inicia sesión nuevamente.');
+      setStatus('Session expired. Please sign in again.');
       router.push('/login');
       return;
     }

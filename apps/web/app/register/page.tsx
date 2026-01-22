@@ -19,9 +19,9 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   const roleCopy = useMemo(() => {
-    if (role === 'company') return 'Empresa';
-    if (role === 'professor') return 'Profesor';
-    return 'Estudiante';
+    if (role === 'company') return 'Company';
+    if (role === 'professor') return 'Professor';
+    return 'Student';
   }, [role]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -43,10 +43,10 @@ export default function RegisterPage() {
 
     try {
       await postJson<Record<string, unknown>>('auth/register', payload);
-      setStatus('Registro enviado. Redirigiendo al login...');
+      setStatus('Registration sent. Redirecting to login...');
       router.push('/login');
     } catch (error) {
-      const message = error instanceof Error ? error.message : JSON.stringify(error) || 'Error al registrar';
+      const message = error instanceof Error ? error.message : JSON.stringify(error) || 'Registration error';
       setStatus(`Error: ${message}`);
     } finally {
       setLoading(false);

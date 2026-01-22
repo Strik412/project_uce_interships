@@ -24,14 +24,14 @@ export default function LoginPage() {
       const token = resolveToken(payload);
       if (token) {
         saveToken(token);
-        setStatus('Inicio de sesion exitoso. Redirigiendo al dashboard...');
+        setStatus('Login successful. Redirecting to dashboard...');
         router.push('/dashboard');
       } else {
-        setStatus('Login exitoso pero no se recibio token.');
+        setStatus('Login successful but no token received.');
       }
     } catch (error) {
       console.error('Login error:', error);
-      const message = error instanceof Error ? error.message : String(error) || 'Error al iniciar sesion';
+      const message = error instanceof Error ? error.message : String(error) || 'Login error';
       setStatus(`Error: ${message}`);
     } finally {
       setLoading(false);
@@ -42,22 +42,22 @@ export default function LoginPage() {
     <main>
       <div className="card" style={{ maxWidth: 520, margin: '0 auto' }}>
         <div className="section-title">
-          <h1>Ingresar</h1>
+          <h1>Sign In</h1>
           <span className="badge">API: {API_BASE_URL}</span>
         </div>
-        <p>Autenticate para acceder al portal. El token se guarda en el navegador.</p>
+        <p>Authenticate to access the portal. The token is stored in your browser.</p>
         <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }}>
-          <label className="label" htmlFor="email">Correo institucional</label>
+          <label className="label" htmlFor="email">Institutional Email</label>
           <input
             id="email"
             type="email"
             required
-            placeholder="usuario@universidad.edu"
+            placeholder="user@university.edu"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
 
-          <label className="label" htmlFor="password">Contrasena</label>
+          <label className="label" htmlFor="password">Password</label>
           <input
             id="password"
             type="password"
