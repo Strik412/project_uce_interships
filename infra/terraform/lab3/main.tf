@@ -1,4 +1,4 @@
-terraform {
+ terraform {
   required_version = ">= 1.6.0"
   required_providers {
     aws = {
@@ -11,29 +11,10 @@ terraform {
 provider "aws" {
   region = var.aws_region
 }
-locals {
-  # Per-service configuration. Each entry becomes one ASG (one instance if ASG sizes = 1).
-  services = {
-    "web" = { port = 3000, ecr_name = "practicas-web" }
-    "api-gateway" = { port = 4000, ecr_name = "practicas-api-gateway" }
-    "auth-service" = { port = 3001, ecr_name = "practicas-auth-service" }
-    "user-management" = { port = 3002, ecr_name = "practicas-user-management" }
-    "registration-service" = { port = 3003, ecr_name = "practicas-registration-service" }
-    "tracking-service" = { port = 3008, ecr_name = "practicas-tracking-service" }
-    "communication-service" = { port = 3004, ecr_name = "practicas-communication-service" }
-    "notification-service" = { port = 3005, ecr_name = "practicas-notification-service" }
-    "document-management-service" = { port = 3006, ecr_name = "practicas-document-management-service" }
-    "reporting-service" = { port = 3007, ecr_name = "practicas-reporting-service" }
-  }
 
-  # Allow selecting a subset of services to enable. If empty, all services are used.
-  selected_services = length(var.enabled_services) > 0 ? { for k, v in local.services : k => v if contains(var.enabled_services, k) } : local.services
-  # Convenience list of keys (used to pick a subnet index)
-  selected_service_keys = keys(local.selected_services)
-}
-
-
-# Get latest Amazon Linux 2 AMI
+# -----------------------------
+# AMI
+# -----------------------------
 data "aws_ami" "amazon_linux_2" {
   most_recent = true
   owners      = ["amazon"]
@@ -42,65 +23,116 @@ data "aws_ami" "amazon_linux_2" {
     name   = "name"
     values = ["amzn2-ami-hvm-*-x86_64-gp2"]
   }
+}
 
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
+# -----------------------------
+# INSTANCIAS (2 SERVICIOS C/U)
+# -----------------------------
+locals {
+  instances = {
+    instance1 = {
+      subnet_index = 0
+      services = {
+        web         = { port = 3000, image = "dapaeza/practicas-web:latest" }
+        api-gateway = { port = 4000, image = "dapaeza/practicas-api-gateway:latest" }
+      }
+    }
+
+    instance2 = {
+      subnet_index = 1
+      services = {
+        auth-service    = { port = 3001, image = "dapaeza/practicas-auth-service:latest" }
+        user-management = { port = 3002, image = "dapaeza/practicas-user-management:latest" }
+      }
+    }
+
+    instance3 = {
+      subnet_index = 2
+      services = {
+        registration-service = { port = 3003, image = "dapaeza/practicas-registration-service:latest" }
+        tracking-service     = { port = 3008, image = "dapaeza/practicas-tracking-service:latest" }
+      }
+    }
+
+    instance4 = {
+      subnet_index = 3
+      services = {
+        document-management-service = { port = 3006, image = "dapaeza/practicas-document-management-service:latest" }
+        notification-service        = { port = 3005, image = "dapaeza/practicas-notification-service:latest" }
+      }
+    }
+
+    instance5 = {
+      subnet_index = 4
+      services = {
+        reporting-service     = { port = 3007, image = "dapaeza/practicas-reporting-service:latest" }
+        communication-service = { port = 3004, image = "dapaeza/practicas-communication-service:latest" }
+      }
+    }
   }
 }
 
-
-
-# Single EC2 instances (one per service) - create these first, then we can safely scale down/destroy ASGs after validation
-resource "aws_instance" "service" {
-  for_each = local.selected_services
+# -----------------------------
+# EC2
+# -----------------------------
+resource "aws_instance" "app" {
+  for_each = local.instances
 
   ami                    = data.aws_ami.amazon_linux_2.id
   instance_type          = var.instance_type
-  subnet_id              = element(var.subnet_ids, index(local.selected_service_keys, each.key) % length(var.subnet_ids))
+  subnet_id              = var.subnet_ids[each.value.subnet_index]
   associate_public_ip_address = false
   vpc_security_group_ids = [var.app_security_group_id]
 
   user_data = templatefile("${path.module}/user_data_multi.sh", {
-    # single service per instance
-    run_services_block   = "run_service \"${each.key}\" \"${each.value.port}\" \"${var.dockerhub_username}/${each.value.ecr_name}:${lookup(var.service_image_tags, each.key, var.default_image_tag)}\""
-    db_host              = var.database_endpoint
-    db_port              = var.database_port
-    db_name              = var.database_name
-    db_user              = var.database_user
-    db_password          = var.database_password
-    redis_host           = var.redis_endpoint
-    redis_port           = var.redis_port
-    aws_region           = var.aws_region
-    dockerhub_username   = var.dockerhub_username
+    services       = jsonencode(each.value.services)
+    db_host        = var.database_endpoint
+    db_port        = var.database_port
+    db_name        = var.database_name
+    db_user        = var.database_user
+    db_password    = var.database_password
+    redis_host     = var.redis_endpoint
+    redis_port     = var.redis_port
   })
 
   tags = {
-    Name  = "practicas-${each.key}"
-    Group = each.key
-  }
-
-  lifecycle {
-    create_before_destroy = true
+    Name = "practicas-${each.key}"
   }
 }
 
-# Register each instance with its service target group
-resource "aws_lb_target_group_attachment" "service" {
-  for_each = local.selected_services
+# -----------------------------
+# ELASTIC IP
+# -----------------------------
+resource "aws_eip" "app" {
+  for_each = aws_instance.app
+  instance = each.value.id
+  vpc      = true
+}
 
-  target_group_arn = var.target_group_arns[each.key]
-  target_id        = aws_instance.service[each.key].id
+# -----------------------------
+# TARGET GROUP ATTACHMENTS
+# -----------------------------
+resource "aws_lb_target_group_attachment" "services" {
+  for_each = {
+    for inst_key, inst in local.instances :
+    for svc_key, svc in inst.services :
+    "${inst_key}-${svc_key}" => {
+      instance_key = inst_key
+      service_key  = svc_key
+      port         = svc.port
+    }
+  }
+
+  target_group_arn = var.target_group_arns[each.value.service_key]
+  target_id        = aws_instance.app[each.value.instance_key].id
   port             = each.value.port
 }
 
-# Outputs
-output "instance_ids" {
-  value       = { for k, v in aws_instance.service : k => v.id }
-  description = "EC2 instance IDs for each service"
-}
-
-output "instance_private_ips" {
-  value       = { for k, v in aws_instance.service : k => v.private_ip }
-  description = "Private IPs of EC2 instances for each service"
+# -----------------------------
+# OUTPUTS
+# -----------------------------
+output "instance_ips" {
+  value = {
+    for k, v in aws_eip.app : k => v.public_ip
+  }
 }
