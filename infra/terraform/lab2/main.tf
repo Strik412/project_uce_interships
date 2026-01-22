@@ -162,19 +162,44 @@ resource "aws_lb_listener_rule" "services" {
 # OUTPUTS PARA LAB 3
 # -------------------------------------------------
 output "alb_dns_name" {
-  value = aws_lb.alb.dns_name
+  description = "Public DNS of the Application Load Balancer"
+  value       = aws_lb.main.dns_name
 }
 
-output "rds_endpoint" {
-  value = aws_db_instance.postgres.endpoint
-}
-
-output "redis_endpoint" {
-  value = aws_elasticache_cluster.redis.cache_nodes[0].address
+output "alb_arn" {
+  description = "ALB ARN"
+  value       = aws_lb.main.arn
 }
 
 output "target_group_arns" {
+  description = "Target group ARNs per service"
   value = {
-    for k, v in aws_lb_target_group.services : k => v.arn
+    for k, tg in aws_lb_target_group.services :
+    k => tg.arn
   }
+}
+
+output "rds_endpoint" {
+  description = "RDS PostgreSQL endpoint"
+  value       = aws_db_instance.postgres.endpoint
+}
+
+output "rds_port" {
+  description = "RDS PostgreSQL port"
+  value       = aws_db_instance.postgres.port
+}
+
+output "rds_db_name" {
+  description = "RDS database name"
+  value       = aws_db_instance.postgres.db_name
+}
+
+output "redis_endpoint" {
+  description = "Redis endpoint"
+  value       = aws_elasticache_replication_group.redis.primary_endpoint_address
+}
+
+output "redis_port" {
+  description = "Redis port"
+  value       = aws_elasticache_replication_group.redis.port
 }

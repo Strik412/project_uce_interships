@@ -131,8 +131,27 @@ resource "aws_lb_target_group_attachment" "services" {
 # -----------------------------
 # OUTPUTS
 # -----------------------------
-output "instance_ips" {
+output "instance_ids" {
+  description = "EC2 instance IDs per logical instance"
   value = {
-    for k, v in aws_eip.app : k => v.public_ip
+    for k, inst in aws_instance.service :
+    k => inst.id
   }
 }
+
+output "instance_private_ips" {
+  description = "Private IPs per instance"
+  value = {
+    for k, inst in aws_instance.service :
+    k => inst.private_ip
+  }
+}
+
+output "instance_public_ips" {
+  description = "Elastic public IPs per instance"
+  value = {
+    for k, eip in aws_eip.service_eip :
+    k => eip.public_ip
+  }
+}
+
