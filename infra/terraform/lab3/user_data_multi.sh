@@ -77,6 +77,7 @@ echo "$SERVICES" | jq -c 'to_entries[]' | while read svc; do
     -e DB_PASSWORD="$DB_PASSWORD" \
     -e REDIS_HOST="$REDIS_HOST" \
     -e REDIS_PORT="$REDIS_PORT" \
+    -e DB_SSL=true \
     $( [ "$NAME" = "api-gateway" ] && echo "-e ALLOWED_ORIGINS=$ALLOWED_ORIGINS" ) \
     "$IMAGE"
 
