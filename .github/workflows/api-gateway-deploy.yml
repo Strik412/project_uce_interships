@@ -1,4 +1,4 @@
-name: Deploy API Gateway Service
+name: Build & Push Api Gateway
 
 on:
   push:
@@ -9,15 +9,12 @@ on:
       - 'apps/api-gateway/**'
       - '.github/workflows/api-gateway-deploy.yml'
 
-      
 env:
-  AWS_REGION: us-east-1
   SERVICE_NAME: api-gateway
-  ASG_NAME: practicas-api-gateway-asg
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
 
 concurrency:
-  group: deploy-practicas-api-gateway-asg
+  group: build-${{ env.SERVICE_NAME }}
   cancel-in-progress: true
 
 jobs:
@@ -25,19 +22,16 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{ env.AWS_REGION }}
+      - name: Install dependencies and run tests
+        working-directory: apps/${{ env.SERVICE_NAME }}
+        run: |
+          pnpm install
+          pnpm test
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -49,37 +43,7 @@ jobs:
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          REPO=${{ secrets.DOCKERHUB_USERNAME }}/practicas-api-gateway
+          REPO=${{ secrets.DOCKERHUB_USERNAME }}/practicas-${{ env.SERVICE_NAME }}
           docker build -t $REPO:latest -t $REPO:$IMAGE_TAG -f apps/${{ env.SERVICE_NAME }}/Dockerfile .
           docker push $REPO:latest
           docker push $REPO:$IMAGE_TAG
-
-      - name: Get instance private IP
-        id: get_ip
-        run: |
-          INSTANCE_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=practicas-${{ env.SERVICE_NAME }}" "Name=instance-state-name,Values=running" --query 'Reservations[0].Instances[0].PrivateIpAddress' --output text)
-          echo "instance_ip=$INSTANCE_IP" >> $GITHUB_OUTPUT
-
-      - name: Deploy to instance via bastion
-        env:
-          IMAGE_TAG: ${{ github.sha }}
-          REPO: ${{ secrets.DOCKERHUB_USERNAME }}/practicas-${{ env.SERVICE_NAME }}
-        run: |
-          echo "${{ secrets.DEPLOY_SSH_KEY }}" > /tmp/deploy_key
-          chmod 600 /tmp/deploy_key
-          ssh -o StrictHostKeyChecking=no -i /tmp/deploy_key -J ${{ secrets.BASTION_USER }}@${{ secrets.BASTION_HOST }} ec2-user@${{ steps.get_ip.outputs.instance_ip }} "/usr/local/bin/deploy_service.sh ${env.SERVICE_NAME} $REPO:$IMAGE_TAG ${env.SERVICE_PORT:-4000}"
-
-      - name: Wait for target group healthy
-        run: |
-          TG_ARN=$(aws elbv2 describe-target-groups --names tg-${{ env.SERVICE_NAME }} --query 'TargetGroups[0].TargetGroupArn' --output text)
-          for i in $(seq 1 60); do
-            STATE=$(aws elbv2 describe-target-health --target-group-arn $TG_ARN --query 'TargetHealthDescriptions[0].TargetHealth.State' --output text)
-            echo "State: $STATE"
-            if [ "$STATE" = "healthy" ]; then exit 0; fi
-            sleep 5
-          done
-          exit 1
-
-      - name: Cleanup deploy key
-        run: |
-          shred -u /tmp/deploy_key || rm -f /tmp/deploy_key
