@@ -5,6 +5,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { CommunicationModule } from './communication.module';
 import { communicationDatabaseConfig } from './database/typeorm.config';
 import { SharedAuthModule, JwtAuthGuard, RolesGuard } from '@app/shared';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -26,5 +27,6 @@ import { SharedAuthModule, JwtAuthGuard, RolesGuard } from '@app/shared';
       useClass: RolesGuard,
     },
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

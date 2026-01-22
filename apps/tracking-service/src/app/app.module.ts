@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { HealthController } from './health/health.controller';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
@@ -16,6 +17,7 @@ import { SharedAuthModule, JwtAuthGuard, RolesGuard } from '@app/shared';
     SharedAuthModule,
     TrackingModule,
   ],
+  controllers: [HealthController],
   providers: [
     {
       provide: APP_GUARD,
