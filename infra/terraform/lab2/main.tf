@@ -13,12 +13,12 @@ provider "aws" {
   region = var.aws_region
 }
 
-# -----------------------------
-# RDS POSTGRES
-# -----------------------------
+# -------------------------------------------------
+# RDS POSTGRES (PRIVATE)
+# -------------------------------------------------
 resource "aws_db_subnet_group" "postgres" {
   name       = "lab2-postgres-subnet-group"
-  subnet_ids = var.subnet_ids
+  subnet_ids = var.private_subnet_ids
 
   tags = {
     Name = "lab2-postgres-subnet-group"
@@ -31,24 +31,30 @@ resource "aws_db_instance" "postgres" {
   engine_version          = "15"
   instance_class          = "db.t3.micro"
   allocated_storage       = 20
+  storage_encrypted       = true
+
+  db_name                 = "lab2db"
   username                = var.db_username
   password                = var.db_password
+
   db_subnet_group_name    = aws_db_subnet_group.postgres.name
   vpc_security_group_ids  = [var.rds_security_group_id]
-  skip_final_snapshot     = true
+
   publicly_accessible     = false
+  skip_final_snapshot     = true
+  backup_retention_period = 7
 
   tags = {
     Name = "lab2-postgres"
   }
 }
 
-# -----------------------------
-# REDIS (ELASTICACHE)
-# -----------------------------
+# -------------------------------------------------
+# REDIS (ELASTICACHE - PRIVATE)
+# -------------------------------------------------
 resource "aws_elasticache_subnet_group" "redis" {
   name       = "lab2-redis-subnet-group"
-  subnet_ids = var.subnet_ids
+  subnet_ids = var.private_subnet_ids
 }
 
 resource "aws_elasticache_cluster" "redis" {
@@ -57,19 +63,25 @@ resource "aws_elasticache_cluster" "redis" {
   node_type            = "cache.t3.micro"
   num_cache_nodes      = 1
   parameter_group_name = "default.redis7"
+
   subnet_group_name    = aws_elasticache_subnet_group.redis.name
   security_group_ids   = [var.redis_security_group_id]
+
+  tags = {
+    Name = "lab2-redis"
+  }
 }
 
-# -----------------------------
-# APPLICATION LOAD BALANCER
-# -----------------------------
+# -------------------------------------------------
+# APPLICATION LOAD BALANCER (PUBLIC)
+# -------------------------------------------------
 resource "aws_lb" "alb" {
   name               = "lab2-alb"
-  internal           = false
   load_balancer_type = "application"
-  security_groups    = [var.alb_security_group_id]
-  subnets            = var.subnet_ids
+  internal           = false
+
+  security_groups = [var.alb_security_group_id]
+  subnets         = var.public_subnet_ids
 
   tags = {
     Name = "lab2-alb"
@@ -92,51 +104,21 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-# -----------------------------
-# TARGET GROUPS (para Lab 3)
-# -----------------------------
+# -------------------------------------------------
+# TARGET GROUPS (EC2 SE REGISTRAN EN LAB 3)
+# -------------------------------------------------
 locals {
   services = {
-    web = {
-      port = 3000
-      path = "/"
-    }
-    api-gateway = {
-      port = 4000
-      path = "/health"
-    }
-    auth-service = {
-      port = 3001
-      path = "/health"
-    }
-    user-management = {
-      port = 3002
-      path = "/health"
-    }
-    registration-service = {
-      port = 3003
-      path = "/health"
-    }
-    communication-service = {
-      port = 3004
-      path = "/health"
-    }
-    notification-service = {
-      port = 3005
-      path = "/health"
-    }
-    document-management-service = {
-      port = 3006
-      path = "/health"
-    }
-    reporting-service = {
-      port = 3007
-      path = "/health"
-    }
-    tracking-service = {
-      port = 3008
-      path = "/health"
-    }
+    web = { port = 3000, path = "/" }
+    api-gateway = { port = 4000, path = "/health" }
+    auth-service = { port = 3001, path = "/health" }
+    user-management = { port = 3002, path = "/health" }
+    registration-service = { port = 3003, path = "/health" }
+    communication-service = { port = 3004, path = "/health" }
+    notification-service = { port = 3005, path = "/health" }
+    document-management-service = { port = 3006, path = "/health" }
+    reporting-service = { port = 3007, path = "/health" }
+    tracking-service = { port = 3008, path = "/health" }
   }
 }
 
@@ -146,7 +128,7 @@ resource "aws_lb_target_group" "services" {
   name        = "tg-${each.key}"
   port        = each.value.port
   protocol    = "HTTP"
-  vpc_id     = var.vpc_id
+  vpc_id      = var.vpc_id
   target_type = "instance"
 
   health_check {
@@ -176,26 +158,23 @@ resource "aws_lb_listener_rule" "services" {
   }
 }
 
-# -----------------------------
-# OUTPUTS (USADOS EN LAB 3)
-# -----------------------------
+# -------------------------------------------------
+# OUTPUTS PARA LAB 3
+# -------------------------------------------------
 output "alb_dns_name" {
   value = aws_lb.alb.dns_name
 }
 
 output "rds_endpoint" {
-  value       = aws_db_instance.postgres.endpoint
-  description = "RDS PostgreSQL endpoint (host:port)"
+  value = aws_db_instance.postgres.endpoint
 }
 
 output "redis_endpoint" {
-  value       = aws_elasticache_cluster.redis.cache_nodes[0].address
-  description = "ElastiCache Redis endpoint"
+  value = aws_elasticache_cluster.redis.cache_nodes[0].address
 }
 
 output "target_group_arns" {
   value = {
     for k, v in aws_lb_target_group.services : k => v.arn
   }
-  description = "Target group ARNs for all services"
 }
