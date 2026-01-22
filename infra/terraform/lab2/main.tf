@@ -18,61 +18,19 @@ provider "aws" {
 # -------------------------------------------------
 # Si quieres unificar public/private en un solo arreglo
 locals {
-  public_subnet_ids  = var.public_subnet_ids
-  private_subnet_ids = var.private_subnet_ids
+  public_subnet_ids = var.public_subnet_ids
 }
 
 # -------------------------------------------------
 # SECURITY GROUPS
 # -------------------------------------------------
-resource "aws_security_group" "rds" {
-  name   = "lab2-rds-sg"
-  vpc_id = var.vpc_id
-
-  description = "Allow Postgres access from app instances"
-
-  ingress {
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [var.app_security_group_id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-resource "aws_security_group" "redis" {
-  name   = "lab2-redis-sg"
-  vpc_id = var.vpc_id
-
-  description = "Allow Redis access from app instances"
-
-  ingress {
-    from_port       = 6379
-    to_port         = 6379
-    protocol        = "tcp"
-    security_groups = [var.app_security_group_id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
 
 # -------------------------------------------------
 # RDS POSTGRES (PRIVATE)
 # -------------------------------------------------
 resource "aws_db_subnet_group" "postgres" {
   name       = "lab2-postgres-subnet-group"
-  subnet_ids = local.private_subnet_ids
+  subnet_ids = local.public_subnet_ids
 
   tags = {
     Name = "lab2-postgres-subnet-group"
@@ -87,12 +45,12 @@ resource "aws_db_instance" "postgres" {
   allocated_storage       = 20
   storage_encrypted       = true
 
-  db_name                 = "lab2db"
+  db_name                 = "practicas_db"
   username                = var.db_username
   password                = var.db_password
 
   db_subnet_group_name    = aws_db_subnet_group.postgres.name
-  vpc_security_group_ids  = [aws_security_group.rds.id]
+  vpc_security_group_ids  = [var.rds_security_group_id]
 
   publicly_accessible     = false
   skip_final_snapshot     = true
@@ -108,7 +66,7 @@ resource "aws_db_instance" "postgres" {
 # -------------------------------------------------
 resource "aws_elasticache_subnet_group" "redis" {
   name       = "lab2-redis-subnet-group"
-  subnet_ids = local.private_subnet_ids
+  subnet_ids = local.public_subnet_ids
 }
 
 resource "aws_elasticache_replication_group" "redis" {
@@ -120,7 +78,7 @@ resource "aws_elasticache_replication_group" "redis" {
   engine_version       = "7.0"
   parameter_group_name = "default.redis7"
   subnet_group_name    = aws_elasticache_subnet_group.redis.name
-  security_group_ids   = [aws_security_group.redis.id]
+  security_group_ids   = [var.redis_security_group_id]
 
   tags = {
     Name = "lab2-redis"

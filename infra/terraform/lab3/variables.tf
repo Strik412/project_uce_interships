@@ -1,9 +1,14 @@
-variable "aws_region" {
-  default = "us-east-1"
+variable "key_pair_name" {
+  description = "EC2 key pair name"
+  type        = string
 }
 
 variable "subnet_ids" {
-  type = list(string)
+  description = "IDs de las subnets públicas para las instancias EC2"
+  type        = list(string)
+}
+variable "aws_region" {
+  default = "us-east-1"
 }
 
 variable "instance_type" {

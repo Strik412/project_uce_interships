@@ -1,23 +1,3 @@
-# -----------------------------
-# SUBNETS EXPLÍCITAS
-# -----------------------------
-resource "aws_subnet" "public" {
-  count                   = 2
-  vpc_id                  = data.aws_vpc.selected.id
-  cidr_block              = "10.0.${count.index}.0/24"
-  availability_zone       = "us-east-1${element(["a", "b"], count.index)}"
-  map_public_ip_on_launch = true
-  tags = { Name = "public-${count.index + 1}" }
-}
-
-resource "aws_subnet" "private" {
-  count                   = 5
-  vpc_id                  = data.aws_vpc.selected.id
-  cidr_block              = "10.0.${count.index + 10}.0/24"
-  availability_zone       = "us-east-1${element(["a", "b", "c", "d", "e"], count.index)}"
-  map_public_ip_on_launch = false
-  tags = { Name = "private-${count.index + 1}" }
-}
 terraform {
   required_version = ">= 1.6.0"
   required_providers {
@@ -250,12 +230,12 @@ output "vpc_id" {
 
 output "public_subnet_ids" {
   description = "Subnets públicas (se usan para ALB y Bastion)"
-  value       = aws_subnet.public[*].id
+  value       = local.subnet_ids
 }
 
 output "private_subnet_ids" {
   description = "Subnets privadas (para instancias de aplicaciones)"
-  value       = aws_subnet.private[*].id
+  value       = local.subnet_ids
 }
 
 output "app_security_group_id" {

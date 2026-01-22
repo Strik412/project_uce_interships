@@ -83,6 +83,7 @@ resource "aws_instance" "app" {
   subnet_id              = var.subnet_ids[each.value.subnet_index]
   associate_public_ip_address = false
   vpc_security_group_ids = [var.app_security_group_id]
+  key_name               = var.key_pair_name
 
   user_data = templatefile("${path.module}/user_data_multi.sh", {
     services       = jsonencode(each.value.services)
