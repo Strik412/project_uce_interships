@@ -33,7 +33,6 @@ locals {
     instance1 = {
       subnet_index = 0
       services = {
-        web         = { port = 3000, image = "dapaeza/practicas-web:latest" }
         api-gateway = { port = 4000, image = "dapaeza/practicas-api-gateway:latest" }
       }
     }
@@ -94,6 +93,7 @@ resource "aws_instance" "app" {
     db_password    = var.database_password
     redis_host     = var.redis_endpoint
     redis_port     = var.redis_port
+    allowed_origins = "https://project-uce-interships-web.vercel.app"
   })
 
   tags = {
