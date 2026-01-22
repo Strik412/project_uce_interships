@@ -2,8 +2,8 @@ import './globals.css';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Practicas Profesionales | Portal',
-  description: 'Portal minimo para estudiantes, empresas y profesores',
+  title: 'Project Internships Portal',
+  description: 'Portal for students, companies, and professors',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
