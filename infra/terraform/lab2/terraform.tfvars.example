@@ -1,16 +1,20 @@
 aws_region = "us-east-1"
 
-# From Lab 1 outputs
-vpc_id = "vpc-xxxxxxxx"
-subnet_ids = [
-  "subnet-xxxxxxxx",
-  "subnet-yyyyyyyy"
-]
-rds_security_group_id   = "sg-rds-xxxxxxxx"
-redis_security_group_id = "sg-redis-xxxxxxxx"
-alb_security_group_id   = "sg-alb-xxxxxxxx"
+vpc_id = "vpc-XXXXXXXX"
 
-# Database credentials
+public_subnet_ids = [
+  "subnet-public-1",
+  "subnet-public-2"
+]
+
+private_subnet_ids = [
+  "subnet-private-1",
+  "subnet-private-2"
+]
+
+rds_security_group_id    = "sg-rds"
+redis_security_group_id = "sg-redis"
+alb_security_group_id   = "sg-alb"
+
 db_username = "postgres"
-db_password = "SecurePassword123!"
-db_name     = "practicas_db"
+db_password = "Strik412"

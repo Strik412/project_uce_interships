@@ -1,60 +1,34 @@
 aws_region = "us-east-1"
 
-# From Lab 1 outputs
 subnet_ids = [
-  "subnet-xxxxxxxx",
-  "subnet-yyyyyyyy"
+  "subnet-xxxx",
+  "subnet-yyyy",
+  "subnet-zzzz",
+  "subnet-aaaa",
+  "subnet-bbbb"
 ]
-app_security_group_id = "sg-app-xxxxxxxx"
 
-# EC2 instance type
-instance_type = "t3.micro"
+instance_type = "t3.small"
+app_security_group_id = "sg-xxxxxxxx"
 
-# ECR registry URL (format: <account-id>.dkr.ecr.us-east-1.amazonaws.com)
-ecr_registry_url = "123456789012.dkr.ecr.us-east-1.amazonaws.com"
-
-# Target group ARNs from Lab 2 outputs
 target_group_arns = {
-  "web"                          = "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/practicas-web-tg/abc123def456"
-  "api-gateway"                  = "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/practicas-api-gateway-tg/abc123def456"
-  "auth-service"                 = "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/practicas-auth-service-tg/abc123def456"
-  "registration-service"         = "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/practicas-registration-service-tg/abc123def456"
-  "user-management"              = "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/practicas-user-management-tg/abc123def456"
-  "communication-service"        = "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/practicas-communication-service-tg/abc123def456"
-  "notification-service"         = "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/practicas-notification-service-tg/abc123def456"
-  "document-management-service"  = "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/practicas-document-management-service-tg/abc123def456"
-  "reporting-service"            = "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/practicas-reporting-service-tg/abc123def456"
-  "tracking-service"             = "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/practicas-tracking-service-tg/abc123def456"
+  web                         = "arn:aws:elasticloadbalancing:..."
+  api-gateway                 = "arn:aws:elasticloadbalancing:..."
+  auth-service                = "arn:aws:elasticloadbalancing:..."
+  user-management             = "arn:aws:elasticloadbalancing:..."
+  registration-service        = "arn:aws:elasticloadbalancing:..."
+  tracking-service            = "arn:aws:elasticloadbalancing:..."
+  document-management-service = "arn:aws:elasticloadbalancing:..."
+  notification-service        = "arn:aws:elasticloadbalancing:..."
+  reporting-service           = "arn:aws:elasticloadbalancing:..."
+  communication-service       = "arn:aws:elasticloadbalancing:..."
 }
 
-# Database endpoints from Lab 2 outputs
-database_endpoint = "practicas-postgres.cxxxxxxxx.us-east-1.rds.amazonaws.com"
+database_endpoint = "lab2-postgres.xxxxxx.us-east-1.rds.amazonaws.com"
 database_port     = 5432
 database_name     = "practicas_db"
 database_user     = "postgres"
-database_password = "SecurePassword123!"
+database_password = "****"
 
-# Redis endpoint from Lab 2 outputs
-redis_endpoint = "practicas-redis.xxxxxxxx.ng.0001.use1.cache.amazonaws.com"
+redis_endpoint = "lab2-redis.xxxxxx.cache.amazonaws.com"
 redis_port     = 6379
-
-# ASG scaling configuration (single-instance per service)
-asg_min     = 1
-asg_max     = 1
-asg_desired = 1
-
-# Enable only the services you want (empty list = all services)
-# Example: run only the 8 services you use (web + api-gateway + auth/user + registration + tracking + document + notification)
-enabled_services = [
-  "web",
-  "api-gateway",
-  "auth-service",
-  "user-management",
-  "registration-service",
-  "tracking-service",
-  "document-management-service",
-  "notification-service",
-]
-
-# Docker Hub username used to pull images
-dockerhub_username = "dapaeza"

@@ -12,13 +12,17 @@ provider "aws" {
   region = var.aws_region
 }
 
-data "aws_caller_identity" "current" {}
+#############################
+# DATA SOURCES
+#############################
 
+# Selección de VPC
 data "aws_vpc" "selected" {
   id      = var.vpc_id
   default = var.vpc_id == null ? true : null
 }
 
+# Subnets
 data "aws_subnets" "selected" {
   filter {
     name   = "vpc-id"
@@ -26,24 +30,30 @@ data "aws_subnets" "selected" {
   }
 }
 
+# AMI Amazon Linux 2
 data "aws_ami" "al2" {
   owners      = ["amazon"]
   most_recent = true
+
   filter {
     name   = "name"
     values = ["amzn2-ami-hvm-*-x86_64-gp2"]
   }
 }
 
+# Local subnets
 locals {
   subnet_ids = var.subnet_ids != null ? var.subnet_ids : data.aws_subnets.selected.ids
-  # ecr_repos removed
 }
 
-# Security groups
+#############################
+# SECURITY GROUPS
+#############################
+
+# ALB Security Group
 resource "aws_security_group" "alb" {
   name        = "lab1-alb-sg"
-  description = "Allow HTTP from internet"
+  description = "Allow HTTP from Internet"
   vpc_id      = data.aws_vpc.selected.id
 
   ingress {
@@ -61,16 +71,17 @@ resource "aws_security_group" "alb" {
   }
 }
 
+# Bastion Security Group
 resource "aws_security_group" "bastion" {
   name        = "lab1-bastion-sg"
-  description = "SSH access from your IP"
+  description = "SSH access for CI/CD (GitHub Actions)"
   vpc_id      = data.aws_vpc.selected.id
 
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.your_ip_cidr]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -81,12 +92,12 @@ resource "aws_security_group" "bastion" {
   }
 }
 
+# App Security Group
 resource "aws_security_group" "app" {
   name        = "lab1-app-sg"
-  description = "Allow app traffic from ALB and SSH from bastion"
+  description = "Allow traffic from ALB and SSH from Bastion"
   vpc_id      = data.aws_vpc.selected.id
 
-  # App ports 3000-4000 range for services
   ingress {
     from_port       = 3000
     to_port         = 4008
@@ -94,7 +105,6 @@ resource "aws_security_group" "app" {
     security_groups = [aws_security_group.alb.id]
   }
 
-  # SSH from bastion
   ingress {
     from_port       = 22
     to_port         = 22
@@ -110,16 +120,17 @@ resource "aws_security_group" "app" {
   }
 }
 
+# RDS Security Group
 resource "aws_security_group" "rds" {
   name        = "lab1-rds-sg"
-  description = "Allow Postgres from app and bastion"
+  description = "Allow access to RDS from app instances"
   vpc_id      = data.aws_vpc.selected.id
 
   ingress {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [aws_security_group.app.id, aws_security_group.bastion.id]
+    security_groups = [aws_security_group.app.id]
   }
 
   egress {
@@ -130,9 +141,10 @@ resource "aws_security_group" "rds" {
   }
 }
 
+# Redis Security Group
 resource "aws_security_group" "redis" {
   name        = "lab1-redis-sg"
-  description = "Allow Redis from app"
+  description = "Allow access to Redis from app instances"
   vpc_id      = data.aws_vpc.selected.id
 
   ingress {
@@ -150,7 +162,10 @@ resource "aws_security_group" "redis" {
   }
 }
 
-# Bastion host (for SSH and troubleshooting)
+#############################
+# BASTION HOST
+#############################
+
 resource "aws_instance" "bastion" {
   ami                         = data.aws_ami.al2.id
   instance_type               = "t2.micro"
@@ -164,41 +179,86 @@ resource "aws_instance" "bastion" {
   }
 }
 
+resource "aws_eip" "bastion" {
+  instance = aws_instance.bastion.id
+  domain   = "vpc"
 
-# Outputs
+  tags = {
+    Name = "lab1-bastion-eip"
+  }
+}
+
+#############################
+# APPLICATION LOAD BALANCER
+#############################
+
+resource "aws_lb" "alb" {
+  name               = "lab1-alb"
+  load_balancer_type = "application"
+  subnets            = local.subnet_ids
+  security_groups    = [aws_security_group.alb.id]
+
+  tags = {
+    Name = "lab1-alb"
+  }
+}
+
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.alb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "ALB is running"
+      status_code  = "200"
+    }
+  }
+}
+
+#############################
+# OUTPUTS
+#############################
+
 output "vpc_id" {
+  description = "VPC ID"
   value       = data.aws_vpc.selected.id
-  description = "VPC used by the stack"
 }
 
-output "subnet_ids" {
+output "public_subnet_ids" {
+  description = "Subnets públicas (se usan para ALB y Bastion)"
   value       = local.subnet_ids
-  description = "Subnets used for the stack"
 }
 
-output "alb_security_group_id" {
-  value       = aws_security_group.alb.id
-  description = "Security group for ALB"
+output "private_subnet_ids" {
+  description = "Subnets privadas (para instancias de aplicaciones)"
+  value       = local.subnet_ids
 }
 
 output "app_security_group_id" {
+  description = "Security group for application instances"
   value       = aws_security_group.app.id
-  description = "Security group for app instances"
+}
+
+output "alb_security_group_id" {
+  description = "Security group for ALB"
+  value       = aws_security_group.alb.id
+}
+
+output "bastion_security_group_id" {
+  description = "Security group for Bastion"
+  value       = aws_security_group.bastion.id
 }
 
 output "rds_security_group_id" {
-  value       = aws_security_group.rds.id
   description = "Security group for RDS"
+  value       = aws_security_group.rds.id
 }
 
 output "redis_security_group_id" {
-  value       = aws_security_group.redis.id
   description = "Security group for Redis"
+  value       = aws_security_group.redis.id
 }
-
-output "bastion_public_ip" {
-  value       = aws_instance.bastion.public_ip
-  description = "Public IP for bastion host"
-}
-
-

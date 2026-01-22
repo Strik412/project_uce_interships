@@ -40,10 +40,10 @@ type DirectoryResponse = {
 };
 
 const roleOptions = [
-  { value: '', label: 'Todos los roles' },
-  { value: 'student', label: 'Estudiante' },
-  { value: 'professor', label: 'Profesor' },
-  { value: 'company', label: 'Empresa' },
+  { value: '', label: 'All roles' },
+  { value: 'student', label: 'Student' },
+  { value: 'professor', label: 'Professor' },
+  { value: 'company', label: 'Company' },
   { value: 'supervisor', label: 'Supervisor' },
   { value: 'admin', label: 'Admin' },
 ];

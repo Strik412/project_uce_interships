@@ -1,41 +1,38 @@
+variable "app_security_group_id" {
+  type = string
+}
 variable "aws_region" {
-  description = "Región de AWS"
-  type        = string
-  default     = "us-east-1"
+  type    = string
+  default = "us-east-1"
 }
 
 variable "vpc_id" {
-  description = "VPC ID desde Lab 1"
-  type        = string
+  type = string
 }
 
-variable "subnet_ids" {
-  description = "Subnets públicas desde Lab 1"
+variable "public_subnet_ids" {
+  description = "Subnets públicas (ALB)"
   type        = list(string)
 }
 
+
 variable "rds_security_group_id" {
-  description = "Security Group para RDS"
-  type        = string
+  type = string
 }
 
 variable "redis_security_group_id" {
-  description = "Security Group para Redis"
-  type        = string
+  type = string
 }
 
 variable "alb_security_group_id" {
-  description = "Security Group para ALB"
-  type        = string
+  type = string
 }
 
 variable "db_username" {
-  description = "Usuario de la base de datos"
-  type        = string
+  type = string
 }
 
 variable "db_password" {
-  description = "Password de la base de datos"
-  type        = string
-  sensitive   = true
+  type      = string
+  sensitive = true
 }

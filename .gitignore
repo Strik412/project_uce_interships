@@ -53,6 +53,7 @@ backup.sql
 crash.log
 crash.*.log
 .terraform.tfstate.lock.info
+.terraform.lock.hcl
 
 # Variables sensibles
 *.tfvars
@@ -66,3 +67,4 @@ scripts
 
 #data
 data
+

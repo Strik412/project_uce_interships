@@ -1,4 +1,4 @@
-name: Deploy Tracking Service
+name: Build & Push Tracking Service
 
 on:
   push:
@@ -8,16 +8,13 @@ on:
     paths:
       - 'apps/tracking-service/**'
       - '.github/workflows/tracking-service-deploy.yml'
-      
-            
+
 env:
-  AWS_REGION: us-east-1
-  SERVICE_NAME: tracking-service
-  ASG_NAME: practicas-tracking-service-asg
+  SERVICE_NAME: tracking-service       # <-- CAMBIAR por cada servicio
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
 
 concurrency:
-  group: deploy-${{ github.workflow }}
+  group: build-${{ env.SERVICE_NAME }}
   cancel-in-progress: true
 
 jobs:
@@ -25,19 +22,16 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{ env.AWS_REGION }}
+      - name: Install dependencies and run tests
+        working-directory: apps/${{ env.SERVICE_NAME }}
+        run: |
+          pnpm install
+          pnpm test
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -49,13 +43,7 @@ jobs:
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          REPO=${{ secrets.DOCKERHUB_USERNAME }}/practicas-tracking-service
+          REPO=${{ secrets.DOCKERHUB_USERNAME }}/practicas-${{ env.SERVICE_NAME }}
           docker build -t $REPO:latest -t $REPO:$IMAGE_TAG -f apps/${{ env.SERVICE_NAME }}/Dockerfile .
           docker push $REPO:latest
           docker push $REPO:$IMAGE_TAG
-
-      - name: Start ASG Instance Refresh
-        run: |
-          aws autoscaling start-instance-refresh \
-            --auto-scaling-group-name ${{ env.ASG_NAME }} \
-            --preferences '{"MinHealthyPercentage": 50, "InstanceWarmup": 300}'
