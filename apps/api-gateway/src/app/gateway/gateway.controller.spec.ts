@@ -30,15 +30,9 @@ describe('GatewayController', () => {
   });
 
   it('should return health status', async () => {
-    const mockServices = [
-      { name: 'service1', status: 'healthy' },
-      { name: 'service2', status: 'healthy' },
-    ];
-    gatewayService.checkServicesHealth.mockResolvedValue(mockServices);
-
     const result = await controller.health();
-    expect(result.gateway).toBe('healthy');
-    expect(result.services).toBe(mockServices);
-    expect(result.overallStatus).toBe('healthy');
+    expect(result.status).toBe('healthy');
+    expect(result.service).toBe('api-gateway');
+    expect(typeof result.timestamp).toBe('string');
   });
 });
