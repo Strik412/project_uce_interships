@@ -8,6 +8,11 @@ const PORT = process.env['DOCUMENT_SERVICE_PORT'] || 3007;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+   // Prefijo global
+  app.setGlobalPrefix('api/v1', { 
+    exclude: ['health'],
+  });
+ 
   // Enable CORS
   app.enableCors({
     origin: '*',

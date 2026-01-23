@@ -6,6 +6,12 @@ import { AppModule } from './app/app.module';
 async function bootstrap() {
   const app: INestApplication = await NestFactory.create(AppModule);
 
+  
+    // Prefijo global
+  app.setGlobalPrefix('api/v1', { 
+    exclude: ['health'],
+  });
+  
   // Global validation
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
 

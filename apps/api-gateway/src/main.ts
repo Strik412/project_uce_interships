@@ -20,8 +20,10 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // Global prefix
-  app.setGlobalPrefix('api/v1', { exclude: ['health'] });
+  // Prefijo global
+  app.setGlobalPrefix('api/v1', { 
+    exclude: ['health'],
+  });
 
   // Global validation pipe
   app.useGlobalPipes(
