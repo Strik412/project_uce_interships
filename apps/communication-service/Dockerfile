@@ -5,8 +5,10 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Instalar pnpm
-RUN npm install -g pnpm@9
+
+# Instalar pnpm y dependencias de build nativas
+RUN apk add --no-cache python3 make g++ \
+  && npm install -g pnpm@9
 
 # Copiar archivos base del monorepo
 COPY package.json pnpm-workspace.yaml tsconfig.base.json ./
@@ -54,6 +56,6 @@ EXPOSE 3004
 
 # 🔽 AJUSTA EL PUERTO SI CAMBIA
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
-  CMD curl -f http://localhost:3004/api/v1/health || exit 1
+  CMD curl -f http://localhost:3005/health || exit 1
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "dist/main.js"]
