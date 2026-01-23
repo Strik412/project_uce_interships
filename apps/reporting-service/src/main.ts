@@ -48,9 +48,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  const port = process.env.PORT || 3008;
-  await app.listen(port);
-  console.log(`Reporting & Analytics Service is running on port ${port}`);
+    const port = process.env.PORT || 3007;
+  await app.listen(port, '0.0.0.0');
+    console.log(`Reporting & Analytics Service is running on port ${port}`);
 }
 
 bootstrap();

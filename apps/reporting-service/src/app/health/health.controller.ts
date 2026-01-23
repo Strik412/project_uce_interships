@@ -5,6 +5,7 @@ import { Public } from '@app/shared';
 @ApiTags('health')
 @Controller()
 export class HealthController {
+  @Public()
   @Get('health')
   @ApiOperation({
     summary: 'Health check',
