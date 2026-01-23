@@ -73,8 +73,8 @@ export default function LoginPage() {
         </form>
         {status && <p style={{ marginTop: 12 }}>{status}</p>}
         <div className="divider" />
-        <p className="small">Necesitas una cuenta? <Link className="link" href="/register">Crear cuenta</Link></p>
-        <p className="small">Ir al <Link className="link" href="/dashboard">dashboard</Link></p>
+        <p className="small">Need an account? <Link className="link" href="/register">Create account</Link></p>
+        <p className="small">Go to <Link className="link" href="/dashboard">dashboard</Link></p>
       </div>
     </main>
   );

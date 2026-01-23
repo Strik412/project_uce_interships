@@ -58,15 +58,15 @@ export default function RegisterPage() {
       <div className="card" style={{ maxWidth: 720, margin: '0 auto' }}>
         <div className="section-title">
           <div>
-            <h1>Crear cuenta</h1>
-            <p>Registra un perfil de {roleCopy} para empezar.</p>
+            <h1>Create your account</h1>
+            <p>Register a {roleCopy} profile to get started.</p>
           </div>
           <span className="badge">API: {API_BASE_URL}</span>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 14 }}>
           <div className="flex-between">
-            <label className="label">Tipo de cuenta</label>
+            <label className="label">Account Type</label>
             <div style={{ display: 'flex', gap: 8 }}>
               {(['student', 'company', 'professor'] as Role[]).map((option) => (
                 <button
@@ -79,9 +79,9 @@ export default function RegisterPage() {
                   }}
                   onClick={() => setRole(option)}
                 >
-                  {option === 'student' && 'Estudiante'}
-                  {option === 'company' && 'Empresa'}
-                  {option === 'professor' && 'Profesor'}
+                  {option === 'student' && 'Student'}
+                  {option === 'company' && 'Company'}
+                  {option === 'professor' && 'Professor'}
                 </button>
               ))}
             </div>
@@ -89,7 +89,7 @@ export default function RegisterPage() {
 
           <div className="card-grid">
             <div>
-              <label className="label" htmlFor="firstName">Nombre</label>
+              <label className="label" htmlFor="firstName">First Name</label>
               <input
                 id="firstName"
                 required
@@ -99,7 +99,7 @@ export default function RegisterPage() {
               />
             </div>
             <div>
-              <label className="label" htmlFor="lastName">Apellido</label>
+              <label className="label" htmlFor="lastName">Last Name</label>
               <input
                 id="lastName"
                 required
@@ -110,17 +110,17 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <label className="label" htmlFor="email">Correo institucional</label>
+          <label className="label" htmlFor="email">Institutional Email</label>
           <input
             id="email"
             type="email"
             required
-            placeholder="usuario@universidad.edu"
+            placeholder="user@university.edu"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
 
-          <label className="label" htmlFor="password">Contrasena</label>
+          <label className="label" htmlFor="password">Password</label>
           <input
             id="password"
             type="password"
@@ -132,7 +132,7 @@ export default function RegisterPage() {
 
           {role === 'company' && (
             <div>
-              <label className="label" htmlFor="companyName">Nombre de la empresa</label>
+              <label className="label" htmlFor="companyName">Company Name</label>
               <input
                 id="companyName"
                 placeholder="TechNova S.A."
@@ -143,14 +143,14 @@ export default function RegisterPage() {
           )}
 
           <button type="submit" disabled={loading}>
-            {loading ? 'Enviando...' : 'Registrarme'}
+            {loading ? 'Sending...' : 'Register'}
           </button>
         </form>
 
         {status && <p style={{ marginTop: 12 }}>{status}</p>}
         <div className="divider" />
-        <p className="small">Ya tienes cuenta? <Link className="link" href="/login">Inicia sesion</Link></p>
-        <p className="small">Ir al <Link className="link" href="/dashboard">dashboard</Link></p>
+        <p className="small">Already have an account? <Link className="link" href="/login">Log in</Link></p>
+        <p className="small">Go to <Link className="link" href="/dashboard">dashboard</Link></p>
       </div>
     </main>
   );
