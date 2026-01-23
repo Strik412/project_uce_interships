@@ -30,7 +30,7 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm
         
-
+        
       - name: Install dependencies and run tests
         working-directory: apps/${{ env.SERVICE_NAME }}
         run: |
