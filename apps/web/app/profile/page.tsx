@@ -131,13 +131,13 @@ export default function ProfilePage() {
       <div className="card" style={{ marginBottom: 18 }}>
         <div className="section-title">
           <div>
-            <h1>Perfil</h1>
-            <p>Actualiza tu información de contacto y datos del rol.</p>
+            <h1>Profile</h1>
+            <p>Update your contact information and role data.</p>
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <span className="pill">Rol: {primaryRole}</span>
-            <Link className="button ghost" href="/dashboard">Regresar al dashboard</Link>
-            <button onClick={handleLogout}>Cerrar sesión</button>
+            <span className="pill">Role: {primaryRole}</span>
+            <Link className="button ghost" href="/dashboard">Back to dashboard</Link>
+            <button onClick={handleLogout}>Log out</button>
           </div>
         </div>
         {status && <p>{status}</p>}
@@ -146,32 +146,31 @@ export default function ProfilePage() {
       <form className="card-grid" onSubmit={handleSave}>
         <div className="card">
           <div className="section-title">
-            <h3>Contacto</h3>
-            <span className="badge">Visible para coordinadores</span>
+            <h3>Contact</h3>
+            <span className="badge">Visible to coordinators</span>
           </div>
-          <label className="label" htmlFor="phone">Teléfono</label>
+          <label className="label" htmlFor="phone">Phone</label>
           <input id="phone" placeholder="099 999 9999" value={phone} onChange={(e) => setPhone(e.target.value)} />
 
-          <label className="label" htmlFor="altEmail">Correo alterno</label>
-          <input id="altEmail" type="email" placeholder="correo@personal.com" value={altEmail} onChange={(e) => setAltEmail(e.target.value)} />
+          <label className="label" htmlFor="altEmail">Alternate Email</label>
+          <input id="altEmail" type="email" placeholder="user@personal.com" value={altEmail} onChange={(e) => setAltEmail(e.target.value)} />
         </div>
 
         {isStudent && (
           <div className="card">
             <div className="section-title">
-              <h3>Datos de estudiante</h3>
-              <span className="badge">Perfil académico</span>
+              <h3>Student Data</h3>
+              <span className="badge">Academic Profile</span>
             </div>
-            <label className="label" htmlFor="studentName">Nombre completo</label>
+            <label className="label" htmlFor="studentName">Full Name</label>
             <input id="studentName" placeholder="Ana Rojas" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
 
-            <label className="label" htmlFor="faculty">Facultad</label>
-            <input id="faculty" placeholder="Ingeniería" value={faculty} onChange={(e) => setFaculty(e.target.value)} />
-
-            <label className="label" htmlFor="career">Carrera</label>
+            <label className="label" htmlFor="faculty">Faculty</label>
+            <input id="faculty" placeholder="Engineering" value={faculty} onChange={(e) => setFaculty(e.target.value)} />
+            <label className="label" htmlFor="career">Career</label>
             <input id="career" placeholder="Software" value={career} onChange={(e) => setCareer(e.target.value)} />
 
-            <label className="label" htmlFor="semester">Semestre</label>
+            <label className="label" htmlFor="semester">Semester</label>
             <input id="semester" placeholder="7" value={semester} onChange={(e) => setSemester(e.target.value)} />
           </div>
         )}
@@ -179,51 +178,49 @@ export default function ProfilePage() {
         {isProfessor && (
           <div className="card">
             <div className="section-title">
-              <h3>Datos de profesor</h3>
-              <span className="badge">Disponibilidad</span>
+              <h3>Professor Data</h3>
+              <span className="badge">Availability</span>
             </div>
-            <label className="label" htmlFor="professorName">Nombre completo</label>
+            <label className="label" htmlFor="professorName">Full Name</label>
             <input id="professorName" placeholder="Carlos Rivera" value={professorName} onChange={(e) => setProfessorName(e.target.value)} />
 
-            <label className="label" htmlFor="officeHours">Horario de atención</label>
-            <input id="officeHours" placeholder="Lun y Mie 15h-17h" value={officeHours} onChange={(e) => setOfficeHours(e.target.value)} />
+            <label className="label" htmlFor="officeHours">Office Hours</label>
+            <input id="officeHours" placeholder="Mon and Wed 3pm-5pm" value={officeHours} onChange={(e) => setOfficeHours(e.target.value)} />
+            <label className="label" htmlFor="officeLocation">Office Location</label>
+            <input id="officeLocation" placeholder="Building B, office 204" value={officeLocation} onChange={(e) => setOfficeLocation(e.target.value)} />
 
-            <label className="label" htmlFor="officeLocation">Ubicación de oficina</label>
-            <input id="officeLocation" placeholder="Edificio B, oficina 204" value={officeLocation} onChange={(e) => setOfficeLocation(e.target.value)} />
-
-            <label className="label" htmlFor="officeNotes">Notas adicionales</label>
-            <textarea id="officeNotes" placeholder="Traer avances impresos" value={officeNotes} onChange={(e) => setOfficeNotes(e.target.value)} />
+            <label className="label" htmlFor="officeNotes">Additional Notes</label>
+            <textarea id="officeNotes" placeholder="Bring printed progress reports" value={officeNotes} onChange={(e) => setOfficeNotes(e.target.value)} />
           </div>
         )}
 
         {isCompany && (
           <div className="card">
             <div className="section-title">
-              <h3>Perfil de empresa</h3>
-              <span className="badge">Datos públicos</span>
+              <h3>Company Profile</h3>
+              <span className="badge">Public Data</span>
             </div>
-            <label className="label" htmlFor="companyName">Nombre comercial</label>
+            <label className="label" htmlFor="companyName">Trade Name</label>
             <input id="companyName" placeholder="TechLabs" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
 
-            <label className="label" htmlFor="companyDescription">Descripción</label>
-            <textarea id="companyDescription" placeholder="Quiénes somos y qué buscamos" value={companyDescription} onChange={(e) => setCompanyDescription(e.target.value)} />
+            <label className="label" htmlFor="companyDescription">Description</label>
+            <textarea id="companyDescription" placeholder="Who we are and what we are looking for" value={companyDescription} onChange={(e) => setCompanyDescription(e.target.value)} />
+            <label className="label" htmlFor="companyWebsite">Website</label>
+            <input id="companyWebsite" placeholder="https://company.com" value={companyWebsite} onChange={(e) => setCompanyWebsite(e.target.value)} />
 
-            <label className="label" htmlFor="companyWebsite">Sitio web</label>
-            <input id="companyWebsite" placeholder="https://empresa.com" value={companyWebsite} onChange={(e) => setCompanyWebsite(e.target.value)} />
-
-            <label className="label" htmlFor="companyContact">Contacto directo</label>
-            <input id="companyContact" placeholder="talento@empresa.com / +593 99 999 9999" value={companyContact} onChange={(e) => setCompanyContact(e.target.value)} />
+            <label className="label" htmlFor="companyContact">Direct Contact</label>
+            <input id="companyContact" placeholder="talent@company.com / +593 99 999 9999" value={companyContact} onChange={(e) => setCompanyContact(e.target.value)} />
           </div>
         )}
 
         <div className="card" style={{ alignSelf: 'start' }}>
           <div className="section-title">
-            <h3>Acciones</h3>
-            <span className="badge">Conectado</span>
+            <h3>Actions</h3>
+            <span className="badge">Connected</span>
           </div>
-          <p className="small">Los cambios se guardan en tu perfil del User Management Service.</p>
-          <button type="submit">Guardar cambios</button>
-          <p className="small" style={{ marginTop: 8 }}>¿Necesitas eliminar cuenta? Añade la acción cuando el backend esté listo.</p>
+          <p className="small">Changes are saved to your User Management Service profile.</p>
+          <button type="submit">Save Changes</button>
+          <p className="small" style={{ marginTop: 8 }}>Need to delete your account? Add the action when the backend is ready.</p>
         </div>
       </form>
     </main>

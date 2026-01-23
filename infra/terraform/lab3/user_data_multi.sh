@@ -12,10 +12,10 @@ yum install -y docker jq
 systemctl enable docker
 systemctl start docker
 
-# Ensure ec2-user can use docker
+# Allow ec2-user to use Docker
 usermod -aG docker ec2-user
 
-# Wait for Docker to be ready
+# Wait until Docker is ready
 until docker info >/dev/null 2>&1; do
   echo "Waiting for Docker to start..."
   sleep 2
@@ -29,7 +29,7 @@ echo "Docker is running"
 docker network create practicas_net || true
 
 # -----------------------------
-# Variables from Terraform
+# Variables injected by Terraform
 # -----------------------------
 SERVICES='${services}'
 
@@ -42,8 +42,12 @@ DB_PASSWORD='${db_password}'
 REDIS_HOST='${redis_host}'
 REDIS_PORT='${redis_port}'
 
+# Frontend origins (Vercel / local if needed)
+ALLOWED_ORIGINS='${allowed_origins}'
+
 export DB_HOST DB_PORT DB_NAME DB_USER DB_PASSWORD
 export REDIS_HOST REDIS_PORT
+export ALLOWED_ORIGINS
 
 # -----------------------------
 # Deploy services
@@ -53,10 +57,11 @@ echo "$SERVICES" | jq -c 'to_entries[]' | while read svc; do
   PORT=$(echo "$svc" | jq -r '.value.port')
   IMAGE=$(echo "$svc" | jq -r '.value.image')
 
-  echo "Deploying service: $NAME ($IMAGE) on port $PORT"
+  echo "Deploying service: $NAME"
+  echo "  Image: $IMAGE"
+  echo "  Port:  $PORT"
 
   docker pull "$IMAGE"
-
   docker rm -f "$NAME" || true
 
   docker run -d \
@@ -72,9 +77,11 @@ echo "$SERVICES" | jq -c 'to_entries[]' | while read svc; do
     -e DB_PASSWORD="$DB_PASSWORD" \
     -e REDIS_HOST="$REDIS_HOST" \
     -e REDIS_PORT="$REDIS_PORT" \
+    -e DB_SSL=true \
+    $( [ "$NAME" = "api-gateway" ] && echo "-e ALLOWED_ORIGINS=$ALLOWED_ORIGINS" ) \
     "$IMAGE"
 
-  echo "Service $NAME deployed"
+  echo "Service $NAME deployed successfully"
 done
 
 echo "=== [BOOTSTRAP] user_data_multi completed successfully ==="

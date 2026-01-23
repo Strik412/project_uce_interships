@@ -16,5 +16,8 @@ export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOpt
     synchronize: false,
     logging: configService.get<boolean>('DB_LOGGING', true),
     dropSchema: false,
+      ssl: {
+    rejectUnauthorized: false,
+  },
   };
 };

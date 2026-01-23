@@ -33,7 +33,6 @@ locals {
     instance1 = {
       subnet_index = 0
       services = {
-        web         = { port = 3000, image = "dapaeza/practicas-web:latest" }
         api-gateway = { port = 4000, image = "dapaeza/practicas-api-gateway:latest" }
       }
     }
@@ -42,7 +41,7 @@ locals {
       subnet_index = 1
       services = {
         auth-service    = { port = 3001, image = "dapaeza/practicas-auth-service:latest" }
-        user-management = { port = 3002, image = "dapaeza/practicas-user-management:latest" }
+        user-management = { port = 3002, image = "dapaeza/practicas-user-management-service:latest" }
       }
     }
 
@@ -50,23 +49,23 @@ locals {
       subnet_index = 2
       services = {
         registration-service = { port = 3003, image = "dapaeza/practicas-registration-service:latest" }
-        tracking-service     = { port = 3008, image = "dapaeza/practicas-tracking-service:latest" }
+        tracking-service     = { port = 3004, image = "dapaeza/practicas-tracking-service:latest" }
       }
     }
 
     instance4 = {
       subnet_index = 3
       services = {
-        document-management-service = { port = 3006, image = "dapaeza/practicas-document-management-service:latest" }
-        notification-service        = { port = 3005, image = "dapaeza/practicas-notification-service:latest" }
+        document-management-service = { port = 3007, image = "dapaeza/practicas-document-management-service:latest" }
+        notification-service        = { port = 3006, image = "dapaeza/practicas-notification-service:latest" }
       }
     }
 
     instance5 = {
       subnet_index = 4
       services = {
-        reporting-service     = { port = 3007, image = "dapaeza/practicas-reporting-service:latest" }
-        communication-service = { port = 3004, image = "dapaeza/practicas-communication-service:latest" }
+        reporting-service     = { port = 3008, image = "dapaeza/practicas-reporting-service:latest" }
+        communication-service = { port = 3005, image = "dapaeza/practicas-communication-service:latest" }
       }
     }
   }
@@ -94,6 +93,7 @@ resource "aws_instance" "app" {
     db_password    = var.database_password
     redis_host     = var.redis_endpoint
     redis_port     = var.redis_port
+    allowed_origins = "https://project-uce-interships-web.vercel.app, https://project-uce-interships-web-git-qa-dylans-projects-9418ff9b.vercel.app " 
   })
 
   tags = {

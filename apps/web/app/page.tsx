@@ -58,17 +58,17 @@ export default function LandingPage() {
         </div>
         <div className="card">
           <div className="section-title">
-            <h3>Para empresas</h3>
-            <span className="badge">Vacantes y feedback</span>
+            <h3>For Companies</h3>
+            <span className="badge">Openings and Feedback</span>
           </div>
-          <p className="small">Crea oportunidades, revisa postulaciones y deja observaciones sobre el desempeno.</p>
+          <p className="small">Create opportunities, review applications, and leave feedback on performance.</p>
         </div>
         <div className="card">
           <div className="section-title">
-            <h3>Para profesores</h3>
-            <span className="badge">Validacion</span>
+            <h3>For Professors</h3>
+            <span className="badge">Validation and Certificates</span>
           </div>
-          <p className="small">Revisa y valida horas para habilitar certificados cuando todo este aprobado.</p>
+          <p className="small">Review and validate hours to enable certificates once everything is approved.</p>
         </div>
       </div>
     </main>

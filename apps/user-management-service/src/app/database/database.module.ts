@@ -25,10 +25,9 @@ import { UserEntity } from './entities/user.entity';
         dropSchema: false,
 
         logging: false,
-        ssl:
-          configService.get('DB_SSL') === 'true'
-            ? { rejectUnauthorized: false }
-            : false,
+        ssl:{
+         rejectUnauthorized: false,
+        },
       }),
     }),
     TypeOrmModule.forFeature([UserEntity]),

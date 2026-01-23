@@ -118,7 +118,7 @@ export default function DashboardPage() {
       const practices = response?.data || response || [];
       setPractices(Array.isArray(practices) ? practices : []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error cargando prácticas');
+      setError(err instanceof Error ? err.message : 'Error loading practices');
       setPractices([]);
     } finally {
       setLoading(false);
@@ -162,7 +162,7 @@ export default function DashboardPage() {
   async function handleCreatePractice(e: React.FormEvent) {
     e.preventDefault();
     if (!companyName || !description) {
-      setError('Completa nombre de empresa y descripción');
+      setError('Complete company name and description');
       return;
     }
 
@@ -178,7 +178,7 @@ export default function DashboardPage() {
         totalHours,
       }, token);
 
-      setSuccess('Práctica creada exitosamente');
+      setSuccess('Practice created successfully');
       setCompanyName('');
       setDescription('');
       setCompanyLocation('');
@@ -186,7 +186,7 @@ export default function DashboardPage() {
       
       await loadPractices(token);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error creando práctica');
+      setError(err instanceof Error ? err.message : 'Error creating practice');
     } finally {
       setLoading(false);
     }
@@ -202,10 +202,10 @@ export default function DashboardPage() {
         userId,
       }, token);
 
-      setSuccess('Postulación enviada');
+      setSuccess('Application submitted');
       await loadApplications(token);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al postular');
+      setError(err instanceof Error ? err.message : 'Error applying');
     } finally {
       setLoading(false);
     }
@@ -220,7 +220,7 @@ export default function DashboardPage() {
       setSuccess(`Aplicación ${status === 'accepted' ? 'aceptada' : 'actualizada'}`);
       await loadApplications(token);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error actualizando aplicación');
+      setError(err instanceof Error ? err.message : 'Error updating application');
     } finally {
       setLoading(false);
     }
@@ -229,7 +229,7 @@ export default function DashboardPage() {
   async function handleAssignProfessor(placementId: string) {
     const professorId = assignInput[placementId];
     if (!professorId) {
-      setError('Ingresa el ID del profesor');
+      setError('Enter the professor ID');
       return;
     }
     setLoading(true);
@@ -237,10 +237,10 @@ export default function DashboardPage() {
     setSuccess('');
     try {
       await patchJson<Placement>(`placements/${placementId}/assign-professor`, { professorId }, token);
-      setSuccess('Profesor invitado para supervisar');
+      setSuccess('Professor invited to supervise');
       await loadPlacements(token);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error asignando profesor');
+      setError(err instanceof Error ? err.message : 'Error assigning professor');
     } finally {
       setLoading(false);
     }
@@ -252,10 +252,10 @@ export default function DashboardPage() {
     setSuccess('');
     try {
       await patchJson<Placement>(`placements/${placementId}/assignment`, { action }, token);
-      setSuccess(action === 'accept' ? 'Has aceptado la supervisión' : 'Has declinado la supervisión');
+      setSuccess(action === 'accept' ? 'You have accepted the supervision' : 'You have declined the supervision');
       await loadPlacements(token);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error respondiendo invitación');
+      setError(err instanceof Error ? err.message : 'Error responding to invitation');
     } finally {
       setLoading(false);
     }
@@ -279,15 +279,15 @@ export default function DashboardPage() {
       <div className="card" style={{ marginBottom: 18 }}>
         <div className="section-title">
           <div>
-            <h1>Portal de Prácticas</h1>
-            <p>Dashboard conectado al backend para gestión de prácticas y aplicaciones.</p>
+            <h1>Practice Portal</h1>
+            <p>Dashboard connected to the backend for managing practices and applications.</p>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
-            <span className="pill">Rol: {primaryRole}</span>
-            <Link className="link" href="/hour-logs">Registro de Horas</Link>
-            <Link className="link" href="/certificates">Certificados</Link>
-            <Link className="link" href="/profile">Perfil</Link>
-            <button onClick={handleLogout}>Cerrar sesión</button>
+            <span className="pill">Role: {primaryRole}</span>
+            <Link className="link" href="/hour-logs">Hour Logs</Link>
+            <Link className="link" href="/certificates">Certificates</Link>
+            <Link className="link" href="/profile">Profile</Link>
+            <button onClick={handleLogout}>Log Out</button>
           </div>
         </div>
         
@@ -309,15 +309,15 @@ export default function DashboardPage() {
         {isStudent && (
           <div className="card">
             <div className="section-title">
-              <h2>Estudiantes</h2>
-              <span className="badge">Postula a prácticas</span>
+              <h2>Students</h2>
+              <span className="badge">Apply to practices</span>
             </div>
-            <p>Explora prácticas disponibles y postula.</p>
+            <p>Explore available practices and apply.</p>
 
             <div className="divider" />
-            <h4>Prácticas disponibles ({(practices || []).length})</h4>
-            {loading && <p className="small">Cargando...</p>}
-            {(practices || []).length === 0 && !loading && <p className="small">No hay prácticas disponibles.</p>}
+            <h4>Available practices ({(practices || []).length})</h4>
+            {loading && <p className="small">Loading...</p>}
+            {(practices || []).length === 0 && !loading && <p className="small">No available practices.</p>}
             <div style={{ display: 'grid', gap: 10 }}>
               {(practices || []).map((practice) => (
                 <div key={practice.id} className="pill" style={{ justifyContent: 'space-between', width: '100%', flexDirection: 'column', alignItems: 'flex-start' }}>
@@ -332,14 +332,14 @@ export default function DashboardPage() {
                   <div style={{ marginTop: 8, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span className="badge">{practice.validationStatus}</span>
                     {hasApplied(practice.id) ? (
-                      <span className="small" style={{ color: 'var(--accent)' }}>✓ Ya postulaste</span>
+                      <span className="small" style={{ color: 'var(--accent)' }}>✓ Applied</span>
                     ) : (
                       <button 
                         type="button" 
                         onClick={() => handleApply(practice.id)}
                         disabled={loading}
                       >
-                        Postular
+                        Apply
                       </button>
                     )}
                   </div>
@@ -348,14 +348,14 @@ export default function DashboardPage() {
             </div>
 
             <div className="divider" />
-            <h4>Mis aplicaciones ({(applications || []).filter(a => (a as any).userId === userId).length})</h4>
+            <h4>My applications ({(applications || []).filter(a => (a as any).userId === userId).length})</h4>
             {(applications || []).filter(a => (a as any).userId === userId).map((app) => {
               const practice = (practices || []).find(p => p.id === app.practiceId);
               return (
                 <div key={app.id} className="pill" style={{ width: '100%', justifyContent: 'space-between' }}>
                   <div>
-                    <strong>{practice?.companyName || 'Práctica'}</strong>
-                    <span className="small" style={{ marginLeft: 8 }}>Estado: {app.status}</span>
+                    <strong>{practice?.companyName || 'Practice'}</strong>
+                    <span className="small" style={{ marginLeft: 8 }}>Status: {app.status}</span>
                   </div>
                 </div>
               );
@@ -367,13 +367,13 @@ export default function DashboardPage() {
         {(isAdmin || isCompany) && (
           <div className="card">
             <div className="section-title">
-              <h2>Gestión de Prácticas</h2>
-              <span className="badge">Crear y administrar</span>
+              <h2>Practice Management</h2>
+              <span className="badge">Create and manage</span>
             </div>
-            <p>Crea nuevas oportunidades de práctica y gestiona aplicaciones.</p>
+            <p>Create new practice opportunities and manage applications.</p>
 
             <form onSubmit={handleCreatePractice} style={{ display: 'grid', gap: 10 }}>
-              <label className="label">Nombre de la empresa</label>
+              <label className="label">Company Name</label>
               <input 
                 value={companyName} 
                 onChange={(e) => setCompanyName(e.target.value)} 
@@ -381,23 +381,23 @@ export default function DashboardPage() {
                 required
               />
               
-              <label className="label">Descripción</label>
+              <label className="label">Description</label>
               <textarea 
                 rows={3} 
                 value={description} 
                 onChange={(e) => setDescription(e.target.value)} 
-                placeholder="Descripción de la práctica, responsabilidades, requisitos..."
+                placeholder="Practice description, responsibilities, requirements..."
                 required
               />
               
-              <label className="label">Ubicación (opcional)</label>
+              <label className="label">Location (optional)</label>
               <input 
                 value={companyLocation} 
                 onChange={(e) => setCompanyLocation(e.target.value)} 
-                placeholder="Remoto / Ciudad" 
+                placeholder="Remote / City" 
               />
               
-              <label className="label">Horas totales</label>
+              <label className="label">Total Hours</label>
               <input 
                 type="number" 
                 min={1} 
@@ -406,21 +406,21 @@ export default function DashboardPage() {
               />
               
               <button type="submit" disabled={loading}>
-                {loading ? 'Creando...' : 'Crear práctica'}
+                {loading ? 'Creating...' : 'Create Practice'}
               </button>
             </form>
 
             <div className="divider" />
-            <h4>Aplicaciones recibidas ({(applications || []).length})</h4>
-            {(applications || []).length === 0 && <p className="small">Sin aplicaciones aún.</p>}
+            <h4>Received Applications ({(applications || []).length})</h4>
+            {(applications || []).length === 0 && <p className="small">No applications yet.</p>}
             {(applications || []).map((app) => {
               const practice = (practices || []).find(p => p.id === app.practiceId);
               return (
                 <div key={app.id} className="flex-between" style={{ marginBottom: 10, padding: 12, background: 'rgba(255,255,255,0.02)', borderRadius: 8 }}>
                   <div>
-                    <strong>Estudiante: {getUserLabel((app as any).userId)}</strong>
+                    <strong>Student: {getUserLabel((app as any).userId)}</strong>
                     <p className="small" style={{ margin: '4px 0' }}>
-                      Práctica: {getPracticeName(app.practiceId)}
+                      Practice: {getPracticeName(app.practiceId)}
                     </p>
                     <span className="badge">{app.status}</span>
                   </div>
@@ -431,7 +431,7 @@ export default function DashboardPage() {
                         onClick={() => handleUpdateApplicationStatus(app.id, 'accepted')}
                         disabled={loading}
                       >
-                        Aceptar
+                        Accept
                       </button>
                       <button 
                         type="button" 
@@ -439,7 +439,7 @@ export default function DashboardPage() {
                         disabled={loading}
                         style={{ background: 'rgba(255,100,100,0.2)' }}
                       >
-                        Rechazar
+                        Reject
                       </button>
                     </div>
                   )}
@@ -448,8 +448,8 @@ export default function DashboardPage() {
             })}
 
             <div className="divider" />
-            <h4>Asignar profesor</h4>
-            {(placements || []).length === 0 && <p className="small">No hay colocaciones para asignar.</p>}
+            <h4>Assign Professor</h4>
+            {(placements || []).length === 0 && <p className="small">No placements to assign.</p>}
             <div style={{ display: 'grid', gap: 10 }}>
               {(placements || []).map((pl) => (
                 <div key={pl.id} className="pill" style={{ width: '100%', alignItems: 'flex-start', flexDirection: 'column' }}>
@@ -465,7 +465,7 @@ export default function DashboardPage() {
                       onChange={(e) => setAssignInput({ ...assignInput, [pl.id]: e.target.value })}
                       style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
                     >
-                      <option value="">Selecciona un profesor...</option>
+                      <option value="">Select a professor...</option>
                       {professors.map((prof) => (
                         <option key={prof.id} value={prof.id}>
                           {prof.name}
@@ -473,7 +473,7 @@ export default function DashboardPage() {
                       ))}
                     </select>
                     <button type="button" onClick={() => handleAssignProfessor(pl.id)} disabled={loading || !(assignInput[pl.id] || '').length}>
-                      Invitar
+                      Invite
                     </button>
                   </div>
                 </div>
@@ -486,39 +486,39 @@ export default function DashboardPage() {
         {isProfessor && (
           <div className="card">
             <div className="section-title">
-              <h2>Profesores</h2>
-              <span className="badge">Tutor académico</span>
+              <h2>Professors</h2>
+              <span className="badge">Academic Tutor</span>
             </div>
-            <p>Supervisa prácticas y valida horas desde el módulo de <Link className="link" href="/hour-logs">Registro de Horas</Link>.</p>
+            <p>Supervises practices and validates hours from the <Link className="link" href="/hour-logs">Hour Logs</Link> module.</p>
 
             <div className="divider" />
-            <h4>Invitaciones de supervisión</h4>
+            <h4>Supervision Invitations</h4>
             {(placements || []).filter(pl => (pl.assignmentStatus === 'invited')).length === 0 && (
-              <p className="small">No tienes invitaciones pendientes.</p>
+              <p className="small">No pending invitations.</p>
             )}
             <div style={{ display: 'grid', gap: 10 }}>
               {(placements || []).filter(pl => pl.assignmentStatus === 'invited').map(pl => (
                 <div key={pl.id} className="pill" style={{ width: '100%', justifyContent: 'space-between' }}>
                   <div>
-                    <strong>Estudiante: {getUserLabel(pl.studentId || pl.student?.id || '')}</strong>
-                    <span className="small" style={{ marginLeft: 8 }}>Práctica: {getPracticeName(pl.practiceId || pl.practice?.id || '')}</span>
+                    <strong>Student: {getUserLabel(pl.studentId || pl.student?.id || '')}</strong>
+                    <span className="small" style={{ marginLeft: 8 }}>Practice: {getPracticeName(pl.practiceId || pl.practice?.id || '')}</span>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <button type="button" onClick={() => handleRespondAssignment(pl.id, 'accept')} disabled={loading}>Aceptar</button>
-                    <button type="button" onClick={() => handleRespondAssignment(pl.id, 'decline')} disabled={loading} style={{ background: 'rgba(255,100,100,0.2)' }}>Declinar</button>
+                    <button type="button" onClick={() => handleRespondAssignment(pl.id, 'accept')} disabled={loading}>Accept</button>
+                    <button type="button" onClick={() => handleRespondAssignment(pl.id, 'decline')} disabled={loading} style={{ background: 'rgba(255,100,100,0.2)' }}>Decline</button>
                   </div>
                 </div>
               ))}
             </div>
 
             <div className="divider" />
-            <h4>Prácticas asignadas</h4>
+            <h4>Assigned Practices</h4>
             {(placements || []).filter(pl => pl.assignmentStatus === 'accepted').length === 0 && (
-              <p className="small">Sin asignaciones aún.</p>
+              <p className="small">No assignments yet.</p>
             )}
             <Link href="/hour-logs">
               <button type="button" style={{ width: '100%' }}>
-                Ir a Registro de Horas →
+                Go to Hour Logs →
               </button>
             </Link>
           </div>
@@ -527,8 +527,8 @@ export default function DashboardPage() {
 
       {roles.length === 0 && (
         <div className="card" style={{ marginTop: 18 }}>
-          <h3>Asigna un rol</h3>
-          <p className="small">Inicia sesión para cargar tu rol desde el token.</p>
+          <h3>Assign a Role</h3>
+          <p className="small">Log in to load your role from the token.</p>
         </div>
       )}
     </main>

@@ -8,14 +8,9 @@ import { AppModule } from './app/app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Add health endpoint BEFORE any routing (NestJS + Express)
-  const expressApp = app.getHttpAdapter().getInstance();
-  expressApp.get('/api/v1/health', (req: Request, res: Response) => {
-    res.json({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      service: 'reporting-service',
-    });
+  // Prefijo global
+  app.setGlobalPrefix('api/v1', { 
+    exclude: ['health'],
   });
 
   // Enable CORS
@@ -48,9 +43,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  const port = process.env.PORT || 3008;
-  await app.listen(port);
-  console.log(`Reporting & Analytics Service is running on port ${port}`);
+    const port = process.env.PORT || 3007;
+  await app.listen(port, '0.0.0.0');
+    console.log(`Reporting & Analytics Service is running on port ${port}`);
 }
 
 bootstrap();

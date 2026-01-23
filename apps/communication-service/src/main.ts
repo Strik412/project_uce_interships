@@ -14,6 +14,10 @@ async function bootstrap() {
     credentials: true,
   });
 
+   app.setGlobalPrefix('api/v1', {
+    exclude: ['health'],
+  });
+  
   // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
@@ -46,7 +50,7 @@ async function bootstrap() {
   });
 
   const port = process.env.PORT || 3005;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 
   console.log(`Communication Service running on port ${port}`);
   console.log(`Swagger documentation available at http://localhost:${port}/api`);

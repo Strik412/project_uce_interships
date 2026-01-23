@@ -97,11 +97,11 @@ export default function HourLogsPage() {
   async function handleCreateLog(e: React.FormEvent) {
     e.preventDefault();
     if (!selectedPlacement) {
-      setError('Selecciona una colocación');
+      setError('Select a placement');
       return;
     }
     if (!date || !hours || !description) {
-      setError('Completa fecha, horas y descripción');
+      setError('Complete date, hours, and description');
       return;
     }
 
@@ -120,7 +120,7 @@ export default function HourLogsPage() {
       
       await postJson<HourLog>('hour-logs', payload, token);
 
-      setSuccess('Registro de horas creado exitosamente');
+      setSuccess('Hour log created successfully');
       setDate('');
       setHours('');
       setDescription('');
@@ -130,7 +130,7 @@ export default function HourLogsPage() {
       await loadHourLogs(token, selectedPlacement.id);
       await loadStats(token, selectedPlacement.id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error creando registro');
+      setError(err instanceof Error ? err.message : 'Error creating log');
     } finally {
       setLoading(false);
     }
@@ -149,11 +149,11 @@ export default function HourLogsPage() {
         token
       );
       
-      setSuccess(`Registro ${status === 'APPROVED' ? 'aprobado' : 'rechazado'}`);
+      setSuccess(`Log ${status === 'APPROVED' ? 'approved' : 'rejected'}`);
       await loadHourLogs(token, selectedPlacement.id);
       await loadStats(token, selectedPlacement.id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error revisando registro');
+      setError(err instanceof Error ? err.message : 'Error reviewing log');
     } finally {
       setLoading(false);
     }
@@ -161,7 +161,7 @@ export default function HourLogsPage() {
 
   async function handleDelete(logId: string) {
     if (!selectedPlacement) return;
-    if (!confirm('¿Eliminar este registro?')) return;
+    if (!confirm('Delete this log?')) return;
     
     setLoading(true);
     setError('');
@@ -173,15 +173,15 @@ export default function HourLogsPage() {
       });
       
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ message: 'Error eliminando registro' }));
-        throw new Error(error.message || 'Error eliminando registro');
+        const error = await response.json().catch(() => ({ message: 'Error deleting log' }));
+        throw new Error(error.message || 'Error deleting log');
       }
       
-      setSuccess('Registro eliminado');
+      setSuccess('Log deleted successfully');
       await loadHourLogs(token, selectedPlacement.id);
       await loadStats(token, selectedPlacement.id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error eliminando registro');
+      setError(err instanceof Error ? err.message : 'Error deleting log');
     } finally {
       setLoading(false);
     }
@@ -210,18 +210,18 @@ export default function HourLogsPage() {
       <div className="card" style={{ marginBottom: 18 }}>
         <div className="section-title">
           <div>
-            <h1>Registro de Horas</h1>
+            <h1>Hour Logs</h1>
             <p>
-              {isStudent && 'Registra y consulta tus horas de práctica - Requiere aprobación del profesor y empresa'}
-              {isProfessor && 'Revisa y aprueba registros de horas de estudiantes - La empresa también debe aprobar'}
-              {isCompany && 'Revisa y aprueba registros de horas de estudiantes - El profesor también debe aprobar'}
+              {isStudent && 'Log and view your practice hours - Requires approval from professor and company'}
+              {isProfessor && 'Review and approve student hour logs - Company approval also required'}
+              {isCompany && 'Review and approve student hour logs - Professor approval also required'}
             </p>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
-            <span className="pill">Rol: {primaryRole}</span>
+            <span className="pill">Role: {primaryRole}</span>
             <Link className="link" href="/dashboard">Dashboard</Link>
-            <Link className="link" href="/profile">Perfil</Link>
-            <button onClick={handleLogout}>Cerrar sesión</button>
+            <Link className="link" href="/profile">Profile</Link>
+            <button onClick={handleLogout}>Log Out</button>
           </div>
         </div>
         
@@ -242,7 +242,7 @@ export default function HourLogsPage() {
       {placements.length > 0 && (
         <div className="card" style={{ marginBottom: 18 }}>
           <div className="section-title">
-            <h2>Colocación Activa</h2>
+            <h2>Active Placement</h2>
             <span className="badge">{selectedPlacement?.status}</span>
           </div>
           <select
@@ -278,40 +278,40 @@ export default function HourLogsPage() {
       {stats && (
         <div className="card" style={{ marginBottom: 18 }}>
           <div className="section-title">
-            <h2>Estadísticas de Progreso</h2>
+            <h2>Progress Statistics</h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
             <div className="pill" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-              <span className="small">Horas Esperadas</span>
+              <span className="small">Expected Hours</span>
               <strong style={{ fontSize: 28, marginTop: 8 }}>{stats.expectedHours}h</strong>
             </div>
             <div className="pill" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-              <span className="small">Horas Completadas</span>
+              <span className="small">Completed Hours</span>
               <strong style={{ fontSize: 28, marginTop: 8 }}>{stats.completedHours}h</strong>
             </div>
             <div className="pill" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-              <span className="small">Aprobadas</span>
+              <span className="small">Approved Hours</span>
               <strong style={{ fontSize: 28, marginTop: 8, color: 'var(--accent)' }}>{stats.approvedHours}h</strong>
             </div>
             <div className="pill" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-              <span className="small">Progreso</span>
+              <span className="small">Progress</span>
               <strong style={{ fontSize: 28, marginTop: 8 }}>{stats.progress}%</strong>
             </div>
           </div>
 
           <div style={{ marginTop: 18 }}>
-            <h4>Detalles de estado</h4>
+            <h4>Status Details</h4>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
               <div style={{ padding: 12, background: '#fffbea', borderRadius: 8 }}>
-                <span className="small">Pendientes</span>
+                <span className="small">Pending Logs</span>
                 <p style={{ fontSize: 20, fontWeight: 'bold', marginTop: 6 }}>{stats.pendingLogs || 0}</p>
               </div>
               <div style={{ padding: 12, background: '#f0fdf4', borderRadius: 8 }}>
-                <span className="small">Aprobados</span>
+                <span className="small">Approved Logs</span>
                 <p style={{ fontSize: 20, fontWeight: 'bold', marginTop: 6, color: 'var(--accent)' }}>{stats.approvedLogs || 0}</p>
               </div>
               <div style={{ padding: 12, background: '#fee2e2', borderRadius: 8 }}>
-                <span className="small">Rechazados</span>
+                <span className="small">Rejected Logs</span>
                 <p style={{ fontSize: 20, fontWeight: 'bold', marginTop: 6, color: '#dc2626' }}>{stats.rejectedLogs || 0}</p>
               </div>
             </div>
@@ -323,14 +323,14 @@ export default function HourLogsPage() {
       {isStudent && selectedPlacement && (
         <div className="card" style={{ marginBottom: 18 }}>
           <div className="section-title">
-            <h2>Registrar nuevas horas</h2>
-            <span className="badge">Completa la información requerida</span>
+            <h2>Register New Hours</h2>
+            <span className="badge">Complete the required information</span>
           </div>
           <form onSubmit={handleCreateLog}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 16, marginBottom: 16 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-                  Fecha <span style={{ color: '#ff4444' }}>*</span>
+                  Date <span style={{ color: '#ff4444' }}>*</span>
                 </label>
                 <input
                   type="date"
@@ -349,7 +349,7 @@ export default function HourLogsPage() {
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-                  Horas <span style={{ color: '#ff4444' }}>*</span>
+                  Hours <span style={{ color: '#ff4444' }}>*</span>
                 </label>
                 <input
                   type="number"
@@ -373,7 +373,7 @@ export default function HourLogsPage() {
 
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-                Descripción <span style={{ color: '#ff4444' }}>*</span>
+                Description <span style={{ color: '#ff4444' }}>*</span>
               </label>
               <textarea
                 value={description}
@@ -388,14 +388,14 @@ export default function HourLogsPage() {
                   minHeight: 80,
                   resize: 'vertical'
                 }}
-                placeholder="Describe lo que hiciste durante este período de prácticas..."
+                placeholder="Describe what you did during this internship period..."
                 required
               />
             </div>
 
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-                Actividades realizadas <span style={{ color: '#999', fontSize: 11 }}>(Opcional)</span>
+                Activities Performed <span style={{ color: '#999', fontSize: 11 }}>(Optional)</span>
               </label>
               <textarea
                 value={activities}
@@ -410,13 +410,13 @@ export default function HourLogsPage() {
                   minHeight: 60,
                   resize: 'vertical'
                 }}
-                placeholder="Detalla las actividades específicas realizadas..."
+                placeholder="Detail the specific activities performed..."
               />
             </div>
 
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-                URL de evidencia <span style={{ color: '#999', fontSize: 11 }}>(Opcional)</span>
+                Evidence URL <span style={{ color: '#999', fontSize: 11 }}>(Optional)</span>
               </label>
               <input
                 type="url"
@@ -430,7 +430,7 @@ export default function HourLogsPage() {
                   fontSize: 14,
                   fontFamily: 'inherit'
                 }}
-                placeholder="https://ejemplo.com/evidencia"
+                placeholder="https://example.com/evidence"
               />
             </div>
 
@@ -460,8 +460,8 @@ export default function HourLogsPage() {
       {/* Hour logs list */}
       <div className="card">
         <div className="section-title">
-          <h2>Registros de horas</h2>
-          <span className="badge">{hourLogs.length} registros</span>
+          <h2>Hour Logs</h2>
+          <span className="badge">{hourLogs.length} logs</span>
         </div>
 
         <div className="divider" />
@@ -469,8 +469,8 @@ export default function HourLogsPage() {
         {hourLogs.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px 20px' }}>
             <div style={{ fontSize: 32, marginBottom: 12 }}>📋</div>
-            <p style={{ fontWeight: 600, marginBottom: 4 }}>No hay registros de horas aún</p>
-            <p className="small">Comienza a registrar tus horas de práctica</p>
+            <p style={{ fontWeight: 600, marginBottom: 4 }}>No hour logs yet</p>
+            <p className="small">Start logging your internship hours</p>
           </div>
         )}
 
@@ -512,24 +512,24 @@ function HourLogCard({ log, isStudent, isProfessor, isCompany = false, onReview,
     PENDING: {
       badge: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
       icon: '⏳',
-      label: 'Pendiente de revisión'
+      label: 'Pending Review'
     },
     APPROVED: {
       badge: 'bg-green-100 text-green-800 border border-green-200',
       icon: '✓',
-      label: 'Aprobado por ambas partes'
+      label: 'Approved by Both Parties'
     },
     REJECTED: {
       badge: 'bg-red-100 text-red-800 border border-red-200',
       icon: '✕',
-      label: 'Rechazado'
+      label: 'Rejected'
     },
   };
 
   const config = statusConfig[normalizedStatus as keyof typeof statusConfig] || {
     badge: 'bg-gray-100 text-gray-800 border border-gray-200',
     icon: '?',
-    label: log.status || 'Desconocido'
+    label: log.status || 'Unknown'
   };
   
   // Check partial approvals
@@ -562,15 +562,15 @@ function HourLogCard({ log, isStudent, isProfessor, isCompany = false, onReview,
           {/* Approval Status for Dual Approval */}
           {isPending && (teacherApproved || companyApproved) && (
             <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-xs font-semibold text-blue-900 mb-2">Estado de aprobación:</p>
+              <p className="text-xs font-semibold text-blue-900 mb-2">Approval Status:</p>
               <div className="flex gap-3 text-xs">
                 <div className={`flex items-center gap-1 px-2 py-1 rounded ${teacherApproved ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
                   <span>{teacherApproved ? '✓' : '○'}</span>
-                  <span>Profesor</span>
+                  <span>Teacher</span>
                 </div>
                 <div className={`flex items-center gap-1 px-2 py-1 rounded ${companyApproved ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
                   <span>{companyApproved ? '✓' : '○'}</span>
-                  <span>Empresa</span>
+                  <span>Company</span>
                 </div>
               </div>
             </div>
@@ -583,7 +583,7 @@ function HourLogCard({ log, isStudent, isProfessor, isCompany = false, onReview,
             
             {log.activities && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p className="text-xs font-medium text-blue-900 uppercase tracking-wide mb-1">Actividades</p>
+                <p className="text-xs font-medium text-blue-900 uppercase tracking-wide mb-1">Activities</p>
                 <p className="text-sm text-blue-800">{log.activities}</p>
               </div>
             )}
@@ -596,7 +596,7 @@ function HourLogCard({ log, isStudent, isProfessor, isCompany = false, onReview,
                   rel="noopener noreferrer"
                   className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline"
                 >
-                  🔗 Ver evidencia
+                  🔗 View Evidence
                 </a>
               </div>
             )}
@@ -605,12 +605,12 @@ function HourLogCard({ log, isStudent, isProfessor, isCompany = false, onReview,
             {log.teacherApprovalComments && (
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                 <p className="font-semibold text-purple-900 mb-1 flex items-center">
-                  👨‍🏫 Comentarios del profesor
+                  👨‍🏫 Teacher Comments
                 </p>
                 <p className="text-sm text-purple-800">{log.teacherApprovalComments}</p>
                 {log.teacherApprovedAt && (
                   <p className="text-xs text-purple-700 mt-2 pt-2 border-t border-purple-200">
-                    Aprobado el {new Date(log.teacherApprovedAt).toLocaleDateString('es-ES')}
+                    Approved on {new Date(log.teacherApprovedAt).toLocaleDateString('en-US')}
                   </p>
                 )}
               </div>
@@ -620,12 +620,12 @@ function HourLogCard({ log, isStudent, isProfessor, isCompany = false, onReview,
             {log.companyApprovalComments && (
               <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
                 <p className="font-semibold text-teal-900 mb-1 flex items-center">
-                  🏢 Comentarios de la empresa
+                  🏢 Company Comments
                 </p>
                 <p className="text-sm text-teal-800">{log.companyApprovalComments}</p>
                 {log.companyApprovedAt && (
                   <p className="text-xs text-teal-700 mt-2 pt-2 border-t border-teal-200">
-                    Aprobado el {new Date(log.companyApprovedAt).toLocaleDateString('es-ES')}
+                    Approved on {new Date(log.companyApprovedAt).toLocaleDateString('en-US')}
                   </p>
                 )}
               </div>
@@ -635,12 +635,12 @@ function HourLogCard({ log, isStudent, isProfessor, isCompany = false, onReview,
             {log.reviewerComments && !log.teacherApprovalComments && !log.companyApprovalComments && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                 <p className="font-semibold text-amber-900 mb-1 flex items-center">
-                  💬 Comentarios del revisor
+                  💬 Reviewer Comments
                 </p>
                 <p className="text-sm text-amber-800">{log.reviewerComments}</p>
                 {log.reviewedBy && (
                   <p className="text-xs text-amber-700 mt-2 pt-2 border-t border-amber-200">
-                    Revisado el {new Date(log.reviewedAt || '').toLocaleDateString('es-ES')}
+                    Reviewed on {new Date(log.reviewedAt || '').toLocaleDateString('en-US')}
                   </p>
                 )}
               </div>
@@ -655,7 +655,7 @@ function HourLogCard({ log, isStudent, isProfessor, isCompany = false, onReview,
               disabled={loading}
               className="text-sm px-3 py-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
-              🗑️ Eliminar
+              🗑️ Delete
             </button>
           )}
           
@@ -692,7 +692,7 @@ function HourLogCard({ log, isStudent, isProfessor, isCompany = false, onReview,
                       disabled={loading}
                       className="flex-1 text-xs bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-semibold"
                     >
-                      ✓ Aprobar
+                      ✓ Approve
                     </button>
                     <button
                       onClick={() => {
@@ -703,14 +703,14 @@ function HourLogCard({ log, isStudent, isProfessor, isCompany = false, onReview,
                       disabled={loading}
                       className="flex-1 text-xs bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-semibold"
                     >
-                      ✕ Rechazar
+                      ✕ Reject
                     </button>
                   </div>
                   <button
                     onClick={() => setShowReview(false)}
                     className="text-xs text-gray-600 hover:text-gray-800 py-1 hover:bg-gray-200 rounded transition"
                   >
-                    Cancelar
+                    Cancel
                   </button>
                 </div>
               )}

@@ -2,10 +2,10 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Public } from '@app/shared';
 
-@ApiTags('health')
-@Controller()
+@ApiTags('Health')
+@Controller('health') // Ahora la ruta base es /health
 export class HealthController {
-  @Get('health')
+  @Get()
   @ApiOperation({
     summary: 'Health check',
     description: 'Check if the service is running',
@@ -19,6 +19,8 @@ export class HealthController {
     };
   }
 
+  // Ruta raíz para info del servicio
+  @Get('/')
   @Get()
   @ApiOperation({
     summary: 'Root endpoint',
