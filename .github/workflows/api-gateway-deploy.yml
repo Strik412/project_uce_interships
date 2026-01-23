@@ -14,7 +14,7 @@ env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
 
 concurrency:
-  group: build-${{ env.SERVICE_NAME }}
+  group: build-api-gateway
   cancel-in-progress: true
 
 jobs:
