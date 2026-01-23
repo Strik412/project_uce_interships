@@ -26,18 +26,14 @@ export class GatewayController {
   @Public()
   @Get('health')
   @ApiOperation({
-    summary: 'Health check',
-    description: 'Check API Gateway and all downstream services health',
+    summary: 'Basic health check',
+    description: 'Check if API Gateway is running',
   })
-  async health() {
-    const services = await this.gatewayService.checkServicesHealth();
-    const allHealthy = services.every((s: { status: string }) => s.status === 'healthy');
-
+  health() {
     return {
-      gateway: 'healthy',
+      status: 'healthy',
+      service: 'api-gateway',
       timestamp: new Date().toISOString(),
-      services,
-      overallStatus: allHealthy ? 'healthy' : 'degraded',
     };
   }
 
