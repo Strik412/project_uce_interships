@@ -55,7 +55,7 @@ resource "aws_security_group" "alb" {
   name        = "lab1-alb-sg"
   description = "Allow HTTP from Internet"
   vpc_id      = data.aws_vpc.selected.id
-
+  
   ingress {
     from_port   = 80
     to_port     = 80
@@ -100,7 +100,71 @@ resource "aws_security_group" "app" {
 
   ingress {
     from_port       = 3000
-    to_port         = 4008
+    to_port         = 3000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+    ingress {
+    from_port       = 3001
+    to_port         = 3001
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+    ingress {
+    from_port       = 3002
+    to_port         = 3002
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+    ingress {
+    from_port       = 3003
+    to_port         = 3003
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+
+    ingress {
+    from_port       = 3004
+    to_port         = 3004
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+    ingress {
+    from_port       = 3005
+    to_port         = 3005
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+    ingress {
+    from_port       = 3006
+    to_port         = 3006
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+    ingress {
+    from_port       = 3007
+    to_port         = 3007
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+    ingress {
+    from_port       = 3008
+    to_port         = 3008
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+    ingress {
+    from_port       = 4000
+    to_port         = 4000
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
   }
@@ -131,6 +195,20 @@ resource "aws_security_group" "rds" {
     to_port         = 5432
     protocol        = "tcp"
     security_groups = [aws_security_group.app.id]
+  }
+
+    ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.bastion.id]
+  }
+  
+    ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    cidr_blocks = ["172.31.0.0/16"]
   }
 
   egress {

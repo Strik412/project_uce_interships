@@ -127,11 +127,11 @@ locals {
     auth-service = { port = 3001, path = "/health" }
     user-management = { port = 3002, path = "/health" }
     registration-service = { port = 3003, path = "/health" }
-    communication-service = { port = 3004, path = "/health" }
-    notification-service = { port = 3005, path = "/health" }
-    document-management-service = { port = 3006, path = "/health" }
-    reporting-service = { port = 3007, path = "/health" }
-    tracking-service = { port = 3008, path = "/health" }
+    communication-service = { port = 3005, path = "/health" }
+    notification-service = { port = 3006, path = "/health" }
+    document-management-service = { port = 3007, path = "/health" }
+    reporting-service = { port = 3008, path = "/health" }
+    tracking-service = { port = 3004, path = "/health" }
   }
 }
 

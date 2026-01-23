@@ -41,7 +41,7 @@ locals {
       subnet_index = 1
       services = {
         auth-service    = { port = 3001, image = "dapaeza/practicas-auth-service:latest" }
-        user-management = { port = 3002, image = "dapaeza/practicas-user-management:latest" }
+        user-management = { port = 3002, image = "dapaeza/practicas-user-management-service:latest" }
       }
     }
 
