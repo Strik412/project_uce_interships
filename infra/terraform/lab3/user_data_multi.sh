@@ -44,10 +44,12 @@ REDIS_PORT='${redis_port}'
 
 # Frontend origins (Vercel / local if needed)
 ALLOWED_ORIGINS='${allowed_origins}'
+ALLOWED_ORIGINS=$(echo "$ALLOWED_ORIGINS" | tr -d ' ')
+export ALLOWED_ORIGINS
 
 export DB_HOST DB_PORT DB_NAME DB_USER DB_PASSWORD
 export REDIS_HOST REDIS_PORT
-export ALLOWED_ORIGINS
+
 
 # -----------------------------
 # Deploy services
