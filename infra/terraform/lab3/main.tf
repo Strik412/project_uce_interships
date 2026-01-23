@@ -93,7 +93,7 @@ resource "aws_instance" "app" {
     db_password    = var.database_password
     redis_host     = var.redis_endpoint
     redis_port     = var.redis_port
-    allowed_origins = "https://project-uce-interships-web.vercel.app"
+    allowed_origins = "https://project-uce-interships-web.vercel.app, https://project-uce-interships-web-git-qa-dylans-projects-9418ff9b.vercel.app " 
   })
 
   tags = {
