@@ -54,6 +54,6 @@ EXPOSE 3004
 
 # 🔽 AJUSTA EL PUERTO SI CAMBIA
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
-  CMD curl -f http://localhost:3004/api/v1/health || exit 1
+  CMD curl -f http://localhost:3004/health || exit 1
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "dist/main.js"]
