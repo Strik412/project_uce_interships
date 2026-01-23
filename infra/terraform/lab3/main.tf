@@ -49,23 +49,23 @@ locals {
       subnet_index = 2
       services = {
         registration-service = { port = 3003, image = "dapaeza/practicas-registration-service:latest" }
-        tracking-service     = { port = 3008, image = "dapaeza/practicas-tracking-service:latest" }
+        tracking-service     = { port = 3004, image = "dapaeza/practicas-tracking-service:latest" }
       }
     }
 
     instance4 = {
       subnet_index = 3
       services = {
-        document-management-service = { port = 3006, image = "dapaeza/practicas-document-management-service:latest" }
-        notification-service        = { port = 3005, image = "dapaeza/practicas-notification-service:latest" }
+        document-management-service = { port = 3007, image = "dapaeza/practicas-document-management-service:latest" }
+        notification-service        = { port = 3006, image = "dapaeza/practicas-notification-service:latest" }
       }
     }
 
     instance5 = {
       subnet_index = 4
       services = {
-        reporting-service     = { port = 3007, image = "dapaeza/practicas-reporting-service:latest" }
-        communication-service = { port = 3004, image = "dapaeza/practicas-communication-service:latest" }
+        reporting-service     = { port = 3008, image = "dapaeza/practicas-reporting-service:latest" }
+        communication-service = { port = 3005, image = "dapaeza/practicas-communication-service:latest" }
       }
     }
   }
