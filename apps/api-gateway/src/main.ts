@@ -20,10 +20,7 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // Prefijo global
-  app.setGlobalPrefix('api/v1', { 
-    exclude: ['health'],
-  });
+     // Eliminado globalPrefix para rutas directas
 
   // Global validation pipe
   app.useGlobalPipes(
@@ -65,21 +62,21 @@ async function bootstrap() {
   console.log(`🚀 API Gateway running on http://localhost:${port}`);
   console.log(`📚 Swagger docs available at http://localhost:${port}/api/docs`);
   console.log(`\n📍 Service Routing:`);
-  console.log(`   /api/v1/auth/*         → Auth Service (3001)`);
-  console.log(`   /api/v1/users/*        → User Management Service (3002)`);
-  console.log(`   /api/v1/practices/*    → Registration Service (3003)`);
-  console.log(`   /api/v1/progress/*     → Tracking Service (3004)`);
-  console.log(`   /api/v1/milestones/*   → Tracking Service (3004)`);
-  console.log(`   /api/v1/assignments/*  → Tracking Service (3004)`);
-  console.log(`   /api/v1/messages/*     → Communication Service (3005)`);
-  console.log(`   /api/v1/conversations/* → Communication Service (3005)`);
-  console.log(`   /api/v1/notifications/* → Notification Service (3006)`);
-  console.log(`   /api/v1/templates/*    → Notification Service (3006)`);
-  console.log(`   /api/v1/documents/*    → Document Management Service (3007)`);
-  console.log(`   /api/v1/reports/*      → Reporting & Analytics Service (3008)`);
-  console.log(`   /api/v1/metrics/*      → Reporting & Analytics Service (3008)`);
-  console.log(`   /api/v1/dashboards/*   → Reporting & Analytics Service (3008)`);
-  console.log(`   /api/v1/analytics/*    → Reporting & Analytics Service (3008)`);
+     console.log(`   /auth/*         → Auth Service (3001)`);
+     console.log(`   /users/*        → User Management Service (3002)`);
+     console.log(`   /practices/*    → Registration Service (3003)`);
+     console.log(`   /progress/*     → Tracking Service (3004)`);
+     console.log(`   /milestones/*   → Tracking Service (3004)`);
+     console.log(`   /assignments/*  → Tracking Service (3004)`);
+     console.log(`   /messages/*     → Communication Service (3005)`);
+     console.log(`   /conversations/* → Communication Service (3005)`);
+     console.log(`   /notifications/* → Notification Service (3006)`);
+     console.log(`   /templates/*    → Notification Service (3006)`);
+     console.log(`   /documents/*    → Document Management Service (3007)`);
+     console.log(`   /reports/*      → Reporting & Analytics Service (3008)`);
+     console.log(`   /metrics/*      → Reporting & Analytics Service (3008)`);
+     console.log(`   /dashboards/*   → Reporting & Analytics Service (3008)`);
+     console.log(`   /analytics/*    → Reporting & Analytics Service (3008)`);
 }
 
 bootstrap().catch(err => {

@@ -130,28 +130,18 @@ pnpm --filter web start
 Environment variables (`.env.local`):
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api/v1
-```
-
-The API base URL is automatically prepended to all API calls.
 
 ## 📁 Project Structure
 
 ```
-apps/web/
-├── app/                          # Next.js App Router
-│   ├── layout.tsx               # Root layout
-│   ├── page.tsx                 # Home page
 │   ├── login/                   # Login page
 │   ├── register/                # Registration page
-│   ├── dashboard/               # Dashboard (role-specific)
-│   │   └── page.tsx
-│   ├── directory/               # Practice directory
 │   │   └── page.tsx
 │   ├── hour-logs/               # Hour logging interface
 │   │   └── page.tsx
 │   └── profile/                 # User profile
 │       └── page.tsx
-├── lib/
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
 │   ├── api.ts                   # API client and types
 │   ├── auth.ts                  # Auth utilities
 │   └── storage.ts               # Token storage
